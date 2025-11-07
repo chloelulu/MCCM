@@ -14,40 +14,35 @@ The scripts in this repository reproduce the main and supplementary figures and 
 ### 1. Statistical Analysis Scripts
 
 **Alpha_Beta_DAA_clean.R**  
-Species-level microbiome analysis, including:
-- Shannon alpha diversity  
-- Weighted UniFrac beta diversity  
-- Differential abundance analysis (ZicoSeq)  
-- Cancer vs. healthy and cancer class vs. cancer class comparisons  
+Species-level analysis for different comparisons used in this study, including:
+- Alpha diversity  
+- Beta diversity  
+- Differential abundance analysis  
 
 **Alpha_Beta_DAA_func_clean.R**  
-Functional pathway (MetaCyc) analysis, including robust Aitchison beta diversity and differential pathway abundance.
+Functional pathway (MetaCyc) analysis and differential pathway abundance analysis.
 
 **Cluster_Mayo_clean.R**  
-Defines cohort subsetting for:
-- Pan-cancer vs. healthy  
-- Cancer class vs. healthy controls  
-- Cancer class vs. other cancers  
-- Early-onset cancer comparisons  
+This main driver script coordinates all major analyses for the MCCM cohort. It calls the two utility scripts (Alpha_Beta_DAA_clean.R and Alpha_Beta_DAA_func_clean.R) to perform species-level and functional (pathway) analyses across all comparison types, including cancer-only, cancer vs. control, cancer-class vs. other cancers, pan-cancer, and early-onset analyses.
 
 **Stats.R**  
-Utility functions (e.g., data subsetting, distance subsetting, ZicoSeq wrappers).
+Utility functions.
 
 **coabundance_networks_fastCCLasso.R**  
-Network inference using fastCCLasso for co-abundance group analysis.
+Network inference using fastCCLasso for co-abundance analysis. Also generates co-abundance network figures: Figure S3B, S2A, S2C, 2B
 
 **fastCCLasso.R**  
-Source implementation of the fastCCLasso method.
+Source implementation of the fastCCLasso method (see [fastCCLasso](https://github.com/ShenZhang-Statistics/fastCCLasso)).
 
 **Colibactin_analysis.R**  
-Analysis of colibactin gene abundance for cancer vs. healthy comparisons.
+Analysis of colibactin gene abundance. Also generates: Figure 2C
 
 ---
 
 ### 2. Summary Scripts
 
 **fixed_summary_clean.R**  
-Aggregates results across multiple cancer-class comparisons into summarized RData outputs.
+Aggregates results across multi-comparison analyses (e.g., 22 cancer-class vs. control) to unified RData files.
 
 **summary_plot_func.R**  
 Generates summary plots from aggregated outputs.
@@ -75,10 +70,6 @@ Generates Figure 5.
 
 **cancer_class_significant_species_heatmaps.R**  
 Generates Figure S4B.
-
----
-
-
 
 ---
 
