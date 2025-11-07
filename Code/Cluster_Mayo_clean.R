@@ -1,3 +1,64 @@
+############################## update Control (05/26/2025) #######################################
+library(readxl)
+Day2 <- read_excel("/Users/luyang1/myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Data/Day2_all_data_with_Elixhauser_for_MCCM.xlsx")
+colnames(Day2)[colnames(Day2)=='Tube.1.Barcode'] ='Tube1Barcode'
+colnames(Day2)[colnames(Day2)=='Tube.2.Barcode'] ='Tube2Barcode'
+colnames(Day2)[colnames(Day2)=='Tube.3.Barcode'] ='Tube3Barcode'
+Day2$Elixhauser_elix.sum <- as.numeric(Day2$Elixhauser_elix.sum)
+colnames(Day2)[colnames(Day2)=='Elixhauser_elix.sum'] ='Elix_score'
+colnames(Day2)[colnames(Day2)=='sequencing_BIOMEid'] ='BIOME_with_sequencing_data'
+Day2 <- as.data.frame(Day2)
+Day2$BMI <- as.numeric(Day2$BMI)
+rownames(Day2) <- Day2$BIOME_with_sequencing_data
+
+tm <- load(file = '/Users/luyang1//myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Data/data.obj.raw.core.RData') 
+tm
+xx <- data.obj$meta.dat
+yy <- data.obj.rff$meta.dat
+
+ctrl <- data.obj$meta.dat[data.obj$meta.dat$Group=='Control',]
+comm <- intersect(rownames(ctrl),Day2$BIOME_with_sequencing_data)
+
+Elixhauser_col <- (colnames(Day2)[grep('Elixhauser',colnames(Day2))])[((colnames(Day2)[grep('Elixhauser',colnames(Day2))]) %in% colnames(ctrl))]
+Day2 <- Day2[comm,c('BIOME_with_sequencing_data','Elix_score',Elixhauser_col,'Age')]
+Day2 <- Day2[comm,]
+data.obj$meta.dat[rownames(Day2),colnames(Day2)] <- Day2
+identical(data.obj$meta.dat[data.obj$meta.dat$Group=='Cancer',, drop =F], xx[xx$Group=='Cancer',, drop =F])
+
+
+
+Day2 <- read_excel("/Users/luyang1/myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Data/Day2_all_data_with_Elixhauser_for_MCCM.xlsx")
+colnames(Day2)[colnames(Day2)=='Tube.1.Barcode'] ='Tube1Barcode'
+colnames(Day2)[colnames(Day2)=='Tube.2.Barcode'] ='Tube2Barcode'
+colnames(Day2)[colnames(Day2)=='Tube.3.Barcode'] ='Tube3Barcode'
+Day2$Elixhauser_elix.sum <- as.numeric(Day2$Elixhauser_elix.sum)
+colnames(Day2)[colnames(Day2)=='Elixhauser_elix.sum'] ='Elix_score'
+colnames(Day2)[colnames(Day2)=='sequencing_BIOMEid'] ='BIOME_with_sequencing_data'
+Day2 <- as.data.frame(Day2)
+Day2$BMI <- as.numeric(Day2$BMI)
+rownames(Day2) <- Day2$BIOME_with_sequencing_data
+
+ctrl <- data.obj.rff$meta.dat[data.obj.rff$meta.dat$Group=='Control',]
+comm <- intersect(rownames(ctrl),Day2$BIOME_with_sequencing_data)
+
+Elixhauser_col <- (colnames(Day2)[grep('Elixhauser',colnames(Day2))])[((colnames(Day2)[grep('Elixhauser',colnames(Day2))]) %in% colnames(ctrl))]
+Day2 <- Day2[comm,c('BIOME_with_sequencing_data','Elix_score',Elixhauser_col,'Age')]
+Day2 <- Day2[comm,]
+data.obj.rff$meta.dat[rownames(Day2),colnames(Day2)] <- Day2
+identical(data.obj.rff$meta.dat[data.obj.rff$meta.dat$Group=='Cancer',, drop =F], yy[yy$Group=='Cancer',, drop =F])
+
+save(data.obj,data.obj.rff,dist.obj,dist.obj.rff, file = '/Users/luyang1/myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Data/data.obj.raw.core.RData')
+
+
+tm <- load("/Users/M216453/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Data/data.obj.raw.core.RData")
+tm
+meta <- data.obj$meta.dat
+tm <- load("/Users/M216453/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Data/data.obj.pathway.RData")
+tm
+identical(rownames(data.obj$meta.dat), rownames(meta))
+data.obj$meta.dat <- meta
+save(data.obj, dist.obj, file = "/Users/M216453/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Data/data.obj.pathway.RData")
+
 ############################## Add variable (10/18/2024) #######################################
 setwd('/Users/luyang1//myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/')
 library(readxl)
@@ -22,20 +83,158 @@ meta.dat <- meta.dat %>% left_join(Oncobiome_previous_treatment, by = c("rowname
 meta.dat$chemotherapy_last_2_years <- as.factor(meta.dat$chemotherapy_last_2_years)
 meta.dat <- meta.dat %>% column_to_rownames(var = "rownames")
 data.obj.rff$meta.dat <- meta.dat
+# save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'Result/CancerOnly/data.obj.wk.RData')
 
 ## As I am not able to access mforge, run local with Alpha_Beta_DAA_clean.R
 variable <- 'chemotherapy_last_2_years'
 wd <- '/Users/luyang1//myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/'
 rd <- '/Users/luyang1//myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Result/'
 
-adj.name <- covars[!(covars %in% c(variable,'GI_nonGI',"Charlson_score","Abx_last_month","PPI_last_month"))]
+covars <- c("Batch","Bristol_score","BMI", "Age", "Sex", "GI_nonGI","Cancer_class","Metastasis","PPI_day_365", "Abx_day_365", 
+            "PPI_last_month","Abx_last_month","Charlson_score","Elix_score","Sample_season","Urban" ,"icd10_first_3_name", "Site")
+adj.name <- covars[!(covars %in% c(variable,'GI_nonGI',"Charlson_score","Abx_last_month","PPI_last_month","Site","icd10_first_3_name"))]
+dir = 'CancerOnly'
 
-############################## Cancer Only #######################################
-wd <- '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/mforge_clean/'
-rd <- '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/mforge_clean/Result/'
+############################## Add icd10_first_3_name collapse colon and rectum(07/24/2025) ####################
+wd <- '/Users/luyang1/myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/'
 setwd(wd)
 source('Code/Stats.R')
 try(load_package())
+load(file = 'Data/backup/data.obj.raw.core.RData') 
+
+## create icd10_first_3_name_short
+data.obj$meta.dat$icd10_first_3_name_short <- data.obj$meta.dat$icd10_first_3_name
+data.obj$meta.dat$icd10_first_3_name_short[data.obj$meta.dat$icd10_first_3_name_short %in% c("Malignant neoplasm of colon","Malignant neoplasm of rectum")] <-  "Malignant neoplasm of colon rectum"
+data.obj$meta.dat$icd10_first_3_name_short <- tolower(gsub("Malignant neoplasm of |Malignant |malignant |Other and | neoplasm| neoplasm of| neoplasms|neoplasm of |\\,|and ", "", data.obj$meta.dat$icd10_first_3_name_short))
+data.obj$meta.dat$icd10_first_3_name_short[grepl('colon rectum',data.obj$meta.dat$icd10_first_3_name_short)] <- 'colorectal'
+data.obj$meta.dat$icd10_first_3_name_short[grepl('Control',data.obj$meta.dat$Group)] <- 'healthy'
+
+data.obj.rff$meta.dat$icd10_first_3_name_short <- data.obj.rff$meta.dat$icd10_first_3_name
+data.obj.rff$meta.dat$icd10_first_3_name_short[data.obj.rff$meta.dat$icd10_first_3_name_short %in% c("Malignant neoplasm of colon","Malignant neoplasm of rectum")] <-  "Malignant neoplasm of colon rectum"
+data.obj.rff$meta.dat$icd10_first_3_name_short <- tolower(gsub("Malignant neoplasm of |Malignant |malignant |Other and | neoplasm| neoplasm of| neoplasms|neoplasm of |\\,|and ", "", data.obj.rff$meta.dat$icd10_first_3_name_short))
+data.obj.rff$meta.dat$icd10_first_3_name_short[grepl('colon rectum',data.obj.rff$meta.dat$icd10_first_3_name_short)] <- 'colorectal'
+data.obj.rff$meta.dat$icd10_first_3_name_short[grepl('Control',data.obj.rff$meta.dat$Group)] <- 'healthy'
+
+## transform blood related variables into normal distributed
+data.obj$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')] <- as.data.frame(sapply(data.obj$meta.dat[,c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')], as.numeric)) %>% 
+  `rownames<-`(rownames(data.obj$meta.dat)) 
+data.obj$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')] <- apply(data.obj$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')], 2, function(x){
+  x[!is.na(x)] <- winzor(x[!is.na(x)], winsor.end = 'both')
+  return(x)
+})
+data.obj$meta.dat <- data.obj$meta.dat %>% mutate(Neutrophils = log2(Neutrophils), Leukocytes = log2(Leukocytes), Platelet.Count = log2(Platelet.Count))
+
+data.obj.rff$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')] <- as.data.frame(sapply(data.obj.rff$meta.dat[,c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')], as.numeric)) %>% 
+  `rownames<-`(rownames(data.obj.rff$meta.dat))  
+data.obj.rff$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')] <- apply(data.obj.rff$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')], 2, function(x){
+  x[!is.na(x)] <- winzor(x[!is.na(x)], winsor.end = 'both')
+  return(x)
+})
+data.obj.rff$meta.dat <- data.obj.rff$meta.dat %>% mutate(Neutrophils = log2(Neutrophils), Leukocytes = log2(Leukocytes), Platelet.Count = log2(Platelet.Count))
+
+## transform blood related variables into binary format
+data.obj$meta.dat$Neutrophils_cat <- as.factor(ifelse(is.na(data.obj$meta.dat$Neutrophils_cat),NA, ifelse(data.obj$meta.dat$Neutrophils_cat =='No','No','Yes')))
+data.obj$meta.dat$Platelet.Count_cat <- as.factor(ifelse(is.na(data.obj$meta.dat$Platelet.Count_cat),NA, ifelse(data.obj$meta.dat$Platelet.Count_cat =='No','No','Yes')))
+data.obj$meta.dat$Hemoglobin_cat <- as.factor(ifelse(is.na(data.obj$meta.dat$Hemoglobin_cat),NA, ifelse(data.obj$meta.dat$Hemoglobin_cat =='No','No','Yes')))
+
+data.obj.rff$meta.dat$Neutrophils_cat <- as.factor(ifelse(is.na(data.obj.rff$meta.dat$Neutrophils_cat),NA, ifelse(data.obj.rff$meta.dat$Neutrophils_cat =='No','No','Yes')))
+data.obj.rff$meta.dat$Platelet.Count_cat <- as.factor(ifelse(is.na(data.obj.rff$meta.dat$Platelet.Count_cat),NA, ifelse(data.obj.rff$meta.dat$Platelet.Count_cat =='No','No','Yes')))
+data.obj.rff$meta.dat$Hemoglobin_cat <- as.factor(ifelse(is.na(data.obj.rff$meta.dat$Hemoglobin_cat),NA, ifelse(data.obj.rff$meta.dat$Hemoglobin_cat =='No','No','Yes')))
+
+## relevel GI_nonGI
+data.obj$meta.dat$GI_nonGI <- factor(data.obj$meta.dat$GI_nonGI,levels=c('non_GI','GI'))
+data.obj.rff$meta.dat$GI_nonGI <- factor(data.obj.rff$meta.dat$GI_nonGI,levels=c('non_GI','GI'))
+
+## add 03/02/2025, change Abx_last_month PPI_last_month NA into No
+data.obj$meta.dat$Abx_last_month <- as.character(data.obj$meta.dat$Abx_last_month)
+data.obj$meta.dat$Abx_last_month[is.na(data.obj$meta.dat$Abx_last_month)] <- 'No'
+data.obj$meta.dat$Abx_last_month <- as.factor(data.obj$meta.dat$Abx_last_month)
+data.obj.rff$meta.dat$Abx_last_month <- as.character(data.obj.rff$meta.dat$Abx_last_month)
+data.obj.rff$meta.dat$Abx_last_month[is.na(data.obj.rff$meta.dat$Abx_last_month)] <- 'No'
+data.obj.rff$meta.dat$Abx_last_month <- as.factor(data.obj.rff$meta.dat$Abx_last_month)
+
+data.obj$meta.dat$PPI_last_month <- as.character(data.obj$meta.dat$PPI_last_month)
+data.obj$meta.dat$PPI_last_month[is.na(data.obj$meta.dat$PPI_last_month)] <- 'No'
+data.obj$meta.dat$PPI_last_month <- as.factor(data.obj$meta.dat$PPI_last_month)
+data.obj.rff$meta.dat$PPI_last_month <- as.character(data.obj.rff$meta.dat$PPI_last_month)
+data.obj.rff$meta.dat$PPI_last_month[is.na(data.obj.rff$meta.dat$PPI_last_month)] <- 'No'
+data.obj.rff$meta.dat$PPI_last_month <- as.factor(data.obj.rff$meta.dat$PPI_last_month)
+
+## create ealy onset
+data.obj$meta.dat$early_onset <- as.factor(ifelse(data.obj$meta.dat$Age<=50,'Yes','No') )
+data.obj.rff$meta.dat$early_onset <- as.factor(ifelse(data.obj.rff$meta.dat$Age<=50,'Yes','No') )
+
+data.obj.rff$meta.dat$icd10_first_3_name_short <- factor(data.obj.rff$meta.dat$icd10_first_3_name_short)
+data.obj.rff$meta.dat$icd10_first_3_name_short <- relevel(data.obj.rff$meta.dat$icd10_first_3_name_short, ref = "healthy")
+
+data.obj$meta.dat$icd10_first_3_name_short <- factor(data.obj$meta.dat$icd10_first_3_name_short)
+data.obj$meta.dat$icd10_first_3_name_short <- relevel(data.obj$meta.dat$icd10_first_3_name_short, ref = "healthy")
+
+save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'Data/data.obj.raw.core.RData')
+
+###### functional data
+load(file = 'Data/backup/data.obj.pathway.RData') 
+## create icd10_first_3_name_short
+data.obj$meta.dat$icd10_first_3_name_short <- data.obj$meta.dat$icd10_first_3_name
+data.obj$meta.dat$icd10_first_3_name_short[data.obj$meta.dat$icd10_first_3_name_short %in% c("Malignant neoplasm of colon","Malignant neoplasm of rectum")] <-  "Malignant neoplasm of colon rectum"
+data.obj$meta.dat$icd10_first_3_name_short <- tolower(gsub("Malignant neoplasm of |Malignant |malignant |Other and | neoplasm| neoplasm of| neoplasms|neoplasm of |\\,|and ", "", data.obj$meta.dat$icd10_first_3_name_short))
+data.obj$meta.dat$icd10_first_3_name_short[grepl('colon rectum',data.obj$meta.dat$icd10_first_3_name_short)] <- 'colorectal'
+data.obj$meta.dat$icd10_first_3_name_short[grepl('Control',data.obj$meta.dat$Group)] <- 'healthy'
+
+## transform blood related variables into normal distributed
+data.obj$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')] <- as.data.frame(sapply(data.obj$meta.dat[,c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')], as.numeric)) %>% 
+  `rownames<-`(rownames(data.obj$meta.dat)) 
+data.obj$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')] <- apply(data.obj$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')], 2, function(x){
+  x[!is.na(x)] <- winzor(x[!is.na(x)], winsor.end = 'both')
+  return(x)
+})
+data.obj$meta.dat <- data.obj$meta.dat %>% mutate(Neutrophils = log2(Neutrophils), Leukocytes = log2(Leukocytes), Platelet.Count = log2(Platelet.Count))
+
+## transform blood related variables into binary format
+data.obj$meta.dat$Neutrophils_cat <- as.factor(ifelse(is.na(data.obj$meta.dat$Neutrophils_cat),NA, ifelse(data.obj$meta.dat$Neutrophils_cat =='No','No','Yes')))
+data.obj$meta.dat$Platelet.Count_cat <- as.factor(ifelse(is.na(data.obj$meta.dat$Platelet.Count_cat),NA, ifelse(data.obj$meta.dat$Platelet.Count_cat =='No','No','Yes')))
+data.obj$meta.dat$Hemoglobin_cat <- as.factor(ifelse(is.na(data.obj$meta.dat$Hemoglobin_cat),NA, ifelse(data.obj$meta.dat$Hemoglobin_cat =='No','No','Yes')))
+
+## relevel GI_nonGI
+data.obj$meta.dat$GI_nonGI <- factor(data.obj$meta.dat$GI_nonGI,levels=c('non_GI','GI'))
+
+## add 03/02/2025, change Abx_last_month PPI_last_month NA into No
+data.obj$meta.dat$Abx_last_month <- as.character(data.obj$meta.dat$Abx_last_month)
+data.obj$meta.dat$Abx_last_month[is.na(data.obj$meta.dat$Abx_last_month)] <- 'No'
+data.obj$meta.dat$Abx_last_month <- as.factor(data.obj$meta.dat$Abx_last_month)
+data.obj.rff$meta.dat$Abx_last_month <- as.character(data.obj.rff$meta.dat$Abx_last_month)
+data.obj.rff$meta.dat$Abx_last_month[is.na(data.obj.rff$meta.dat$Abx_last_month)] <- 'No'
+data.obj.rff$meta.dat$Abx_last_month <- as.factor(data.obj.rff$meta.dat$Abx_last_month)
+
+## create ealy onset
+data.obj$meta.dat$early_onset <- as.factor(ifelse(data.obj$meta.dat$Age<=50,'Yes','No') )
+
+data.obj$meta.dat$icd10_first_3_name_short <- factor(data.obj$meta.dat$icd10_first_3_name_short)
+data.obj$meta.dat$icd10_first_3_name_short <- relevel(data.obj$meta.dat$icd10_first_3_name_short, ref = "healthy")
+
+save(data.obj, dist.obj, file = 'Data/data.obj.pathway.RData')
+
+
+
+
+############################# Define script ######################################
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+rd <- paste0(file_dir,'/Result/')
+taxon_script <- paste0(file_dir,'/Code/Submission/MayoOncobiomeStudy/Code/Alpha_Beta_DAA_clean.R')
+func_script <- paste0(file_dir,'/Code/Submission/MayoOncobiomeStudy/Code/Alpha_Beta_DAA_func_clean.R')
+
+############################## Cancer Only #######################################
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+
 getwd()
 load(file = 'Data/data.obj.raw.core.RData') 
 
@@ -53,47 +252,11 @@ dist.obj <- subset_dist(dist.obj, ind)
 ind <- data.obj.rff$meta.dat$Group == 'Cancer'
 data.obj.rff <- subset_data(data.obj.rff, ind)
 dist.obj.rff <- subset_dist(dist.obj.rff, ind)
-
-
-## transform blood related variables into normal distributed
-data.obj$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')] <- as.data.frame(sapply(data.obj$meta.dat[,c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')], as.numeric)) %>% 
-  `rownames<-`(rownames(data.obj$meta.dat)) 
-data.obj.rff$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')] <- as.data.frame(sapply(data.obj.rff$meta.dat[,c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')], as.numeric)) %>% 
-  `rownames<-`(rownames(data.obj.rff$meta.dat))  
-
-data.obj$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')] <- apply(data.obj$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')], 2, function(x){
-  x[!is.na(x)] <- winzor(x[!is.na(x)], winsor.end = 'both')
-  return(x)
-})
-data.obj.rff$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')] <- apply(data.obj.rff$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')], 2, function(x){
-  x[!is.na(x)] <- winzor(x[!is.na(x)], winsor.end = 'both')
-  return(x)
-})
-
-data.obj$meta.dat <- data.obj$meta.dat %>% mutate(Neutrophils = log2(Neutrophils), Leukocytes = log2(Leukocytes), Platelet.Count = log2(Platelet.Count))
-data.obj.rff$meta.dat <- data.obj.rff$meta.dat %>% mutate(Neutrophils = log2(Neutrophils), Leukocytes = log2(Leukocytes), Platelet.Count = log2(Platelet.Count))
-
-## transform blood related variables into binary format
-data.obj$meta.dat$Neutrophils_cat <- as.factor(ifelse(is.na(data.obj$meta.dat$Neutrophils_cat),NA, ifelse(data.obj$meta.dat$Neutrophils_cat =='No','No','Yes')))
-data.obj$meta.dat$Platelet.Count_cat <- as.factor(ifelse(is.na(data.obj$meta.dat$Platelet.Count_cat),NA, ifelse(data.obj$meta.dat$Platelet.Count_cat =='No','No','Yes')))
-data.obj$meta.dat$Hemoglobin_cat <- as.factor(ifelse(is.na(data.obj$meta.dat$Hemoglobin_cat),NA, ifelse(data.obj$meta.dat$Hemoglobin_cat =='No','No','Yes')))
-
-data.obj.rff$meta.dat$Neutrophils_cat <- as.factor(ifelse(is.na(data.obj.rff$meta.dat$Neutrophils_cat),NA, ifelse(data.obj.rff$meta.dat$Neutrophils_cat =='No','No','Yes')))
-data.obj.rff$meta.dat$Platelet.Count_cat <- as.factor(ifelse(is.na(data.obj.rff$meta.dat$Platelet.Count_cat),NA, ifelse(data.obj.rff$meta.dat$Platelet.Count_cat =='No','No','Yes')))
-data.obj.rff$meta.dat$Hemoglobin_cat <- as.factor(ifelse(is.na(data.obj.rff$meta.dat$Hemoglobin_cat),NA, ifelse(data.obj.rff$meta.dat$Hemoglobin_cat =='No','No','Yes')))
-
-elix.names <- colnames(data.obj$meta.dat)[grep('Elixhauser_',colnames(data.obj$meta.dat))]
-elix.names <- elix.names[!(elix.names %in% c("Elixhauser_dtindex","Elixhauser_elix.sum"))]
-
-data.obj$meta.dat$GI_nonGI <- factor(data.obj$meta.dat$GI_nonGI,levels=c('non_GI','GI'))
-data.obj.rff$meta.dat$GI_nonGI <- factor(data.obj.rff$meta.dat$GI_nonGI,levels=c('non_GI','GI'))
-
-
 save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
 
 
 covars <- c("Batch","Bristol_score","BMI", "Age", "Sex", "GI_nonGI","Cancer_class","Metastasis","PPI_day_365", "Abx_day_365", 
-            "PPI_last_month","Abx_last_month","Charlson_score","Elix_score","Sample_season","Urban" ,"icd10_first_3_name")
+            "PPI_last_month","Abx_last_month","Charlson_score","Elix_score","Sample_season","Urban" ,"icd10_first_3_name_short", "Site")
 blood.names <- c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count',
                  'Neutrophils_cat','Platelet.Count_cat','Hemoglobin_cat',
                  "neut_neutropenia2","bone_marrow_suppression2","Hb_anemia2","Pl_thrombocytopenia2","neut_neutropenia_c","Hb_anemia_c","Pl_thrombocytopenia_c")
@@ -102,162 +265,115 @@ elix.names <- c("Elixhauser_CHF","Elixhauser_Arrhythmia","Elixhauser_Valvular","
                 "Elixhauser_PUD" ,"Elixhauser_HIV","Elixhauser_Lymphoma","Elixhauser_Mets","Elixhauser_Tumor","Elixhauser_Rheumatic","Elixhauser_Coagulopathy",
                 "Elixhauser_Obesity","Elixhauser_WeightLoss","Elixhauser_FluidsLytes","Elixhauser_BloodLoss","Elixhauser_Anemia","Elixhauser_Alcohol","Elixhauser_Drugs",
                 "Elixhauser_Psychoses","Elixhauser_Depression")
-charlson.names <- c("Charlson_MI","Charlson_CHF","Charlson_PVD","Charlson_Stroke","Charlson_Dementia","Charlson_Pulmonary","Charlson_Rheumatic",  
-                    "Charlson_PUD","Charlson_LiverMild","Charlson_DM","Charlson_DMcx","Charlson_Paralysis","Charlson_Renal","Charlson_Cancer",     
-                    "Charlson_LiverSevere","Charlson_Mets","Charlson_HIV")
-
-variables <- c(covars, blood.names, elix.names, charlson.names)
+variables <- c(covars[!(covars %in% c("Batch"))], blood.names, elix.names)
 dir <- 'CancerOnly'
-
 for(variable in variables){
-  sh <- paste(
-    "sbatch",
-    paste0("-J ", variable),
-    "--partition=cpu-short",
-    paste("--output=/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/OUT/",  variable, "_",dir,".out", sep=""),
-    paste("--error=/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/OUT/",  variable,"_",dir,".err", sep=""),
-    "--time=1-00:00:00",
-    "--mem=64G",
-    "--export=ALL",
-    paste("\'--wrap=R CMD BATCH --no-restore \"--args ", variable," ",dir,"\" ",
-          "/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/Code/Alpha_Beta_DAA_clean.R", " ", paste0("/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/",variable,"_",dir,".Rout"), "\'", sep="")
-  )
-  print(sh)
-  system(sh)
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
 }
 
-
-
+# setwd("/Users/luyang1/myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Result/CancerOnly/DAA/")
+# dirs <- list.dirs(recursive = F,full.names = F)
+# xx <- NULL
+# for(dir in dirs){
+#   diff.obj <- NULL
+#   load(paste0(dir,'/',dir,'_ZicoSeq.Rdata'))
+#   x <- colnames(diff.obj$coef.list$Species)[grep(dir,colnames(diff.obj$coef.list$Species))]
+#   if(sum(grepl('1$',x))>0) xx <- c(xx, dir)
+# }
+# 
+# variables <- xx
 ############################## Control vs sub Cancer X #######################################
-wd <- '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/'
-rd <- '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/Result/subCancerX_Control/'
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/subCancerX_Control/')
+
+if(!dir.exists(rd)) dir.create(rd)
 setwd(wd)
-source('Code/Stats.R')
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
 try(load_package())
+
 load(file = 'Data/data.obj.raw.core.RData') 
+
 data.obj2 <- data.obj
 data.obj.rff2 <- data.obj.rff
 dist.obj2 <- dist.obj
 dist.obj.rff2 <- dist.obj.rff
 
-data.obj2$meta.dat$icd10_first_3_name <- as.character(data.obj2$meta.dat$icd10_first_3_name)
-data.obj2$meta.dat$icd10_first_3_name[data.obj2$meta.dat$Group=='Control'] <- 'Control'
-samIDs <- rownames(data.obj2$meta.dat[data.obj2$meta.dat$icd10_first_3_name %in% names(which(sort(table(data.obj2$meta.dat$icd10_first_3_name))>15)),])
-data.obj2 <- subset_data(data.obj2, samIDs = samIDs)
-dist.obj2 <- subset_dist(dist.obj2, samIDs = samIDs)
-
-
-data.obj.rff2$meta.dat$icd10_first_3_name <- as.character(data.obj.rff2$meta.dat$icd10_first_3_name)
-data.obj.rff2$meta.dat$icd10_first_3_name[data.obj.rff2$meta.dat$Group=='Control'] <- 'Control'
-samIDs <- rownames(data.obj.rff2$meta.dat[data.obj2$meta.dat$icd10_first_3_name %in% names(which(sort(table(data.obj2$meta.dat$icd10_first_3_name))>15)),])
-data.obj.rff2 <- subset_data(data.obj.rff2, samIDs = samIDs)
-dist.obj.rff2 <- subset_dist(dist.obj.rff2, samIDs = samIDs)
-
-
-data.obj2$meta.dat$icd10_first_3_name <- as.factor(data.obj2$meta.dat$icd10_first_3_name)
-data.obj.rff2$meta.dat$icd10_first_3_name <- as.factor(data.obj.rff2$meta.dat$icd10_first_3_name)
-table(data.obj2$meta.dat$icd10_first_3_name, data.obj2$meta.dat$Batch)
-
-cancer.type <- as.vector(unique(data.obj2$meta.dat$icd10_first_3_name)[!is.na(unique(data.obj2$meta.dat$icd10_first_3_name))])
-cancer.type <- cancer.type[cancer.type != 'Control']
-# cancer.type <- cancer.type[-grep('ther',cancer.type)]
-# cancer.type <- cancer.type[grep('ther',cancer.type)] # 2024/10/31 Ruben requests to add 2 cancer types with names "other" back, we run this line of code for adding. However, when submission, exclude this line and one line above means all cancer types>15 included
-
-cancer.dir <- gsub('Malignant neoplasm of |Multiple myeloma and malignant |Malignant ','',cancer.type)
-cancer.dir <- gsub('Other\\ and\\ |malignant\\ ','',cancer.dir)## add 2024/10/31 for adding 2 other cancer back
-cancer.dir <- gsub('__','_',gsub(',|\\ ','_',cancer.dir))
-cancer.dir <- gsub('eye_brain_and_other_parts_of_|_and','',cancer.dir)
-setwd(rd)
+cancer.type <- names(which(table(data.obj2$meta.dat$icd10_first_3_name_short)>15))
+cancer.type <- cancer.type[cancer.type != 'healthy']
 
 for(i in 1:length(cancer.type)){
+  setwd(rd)
   cancer <- cancer.type[i]
   cat('[',cancer,']\n')
-  dir <- paste0('Control-',cancer.dir[i])
+  dir <- paste0('Control-',cancer.type[i])
   if(!dir.exists(dir)){dir.create(dir)}
   setwd(dir)
   getwd()
   
-  ind <- data.obj2$meta.dat$icd10_first_3_name %in% c('Control',cancer)
+  ind <- data.obj2$meta.dat$icd10_first_3_name_short %in% c('healthy',cancer)
   data.obj <- subset_data(data.obj2, ind)
   dist.obj <- subset_dist(dist.obj2, ind)
   cat(sum(ind),'\n')
   
-  ind <- data.obj.rff2$meta.dat$icd10_first_3_name %in% c('Control',cancer)
+  ind <- data.obj.rff2$meta.dat$icd10_first_3_name_short %in% c('healthy',cancer)
   data.obj.rff <- subset_data(data.obj.rff2, ind)
   dist.obj.rff <- subset_dist(dist.obj.rff2, ind)
   cat(sum(ind),'\n')
   
-  data.obj$meta.dat$icd10_first_3_name <- factor(data.obj$meta.dat$icd10_first_3_name,levels=c('Control',cancer))
-  data.obj.rff$meta.dat$icd10_first_3_name <- factor(data.obj.rff$meta.dat$icd10_first_3_name,levels=c('Control',cancer))
+  data.obj$meta.dat$icd10_first_3_name_short <- factor(data.obj$meta.dat$icd10_first_3_name_short,levels=c('healthy',cancer))
+  data.obj.rff$meta.dat$icd10_first_3_name_short <- factor(data.obj.rff$meta.dat$icd10_first_3_name_short,levels=c('healthy',cancer))
   
   save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
   setwd('..')
 }
 
+# setwd("/Users/luyang1/myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Result/subCancerX_Control/")
+# dirs <- list.dirs(recursive = F,full.names = F)
+# xx <- NULL
+# for(dir in dirs){
+#   diff.obj <- NULL
+#   load(paste0(dir,'/DAA/icd10_first_3_name_short/icd10_first_3_name_short_ZicoSeq.Rdata'))
+#   x <- colnames(diff.obj$coef.list$Species)[grep('icd10_first_3_name_short',colnames(diff.obj$coef.list$Species))]
+#   if(grepl('1$',x)) xx <- c(xx, dir)
+# }
+# cancer.type <- cancer.type[cancer.type %in% gsub('Control-','',xx)]
 
-variables <- c("icd10_first_3_name")
-for(dir in paste0('subCancerX_Control/Control-',cancer.dir)){
-  for(variable in variables){
-    sh <- paste(
-      "sbatch",
-      paste0("-J ", variable,'-',gsub('subCancerX_Control/','',dir)),
-      "--partition=cpu-short",
-      paste("--output=/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/OUT/",  variable, "_",gsub('subCancerX_Control/','',dir),".out", sep=""),
-      paste("--error=/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/OUT/",  variable,"_",gsub('subCancerX_Control/','',dir),".err", sep=""),
-      "--time=1-00:00:00",
-      "--mem=64G",
-      "--export=ALL",
-      paste("\'--wrap=R CMD BATCH --no-restore \"--args ", variable," ",dir,"\" ",
-            "/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/Code/Alpha_Beta_DAA_clean.R", " ", paste0("/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/",variable,"_",gsub('subCancerX_Control/','',dir),".Rout"), "\'", sep="")
-    )
-    print(sh)
-    system(sh)
-  }
+variable <- c("icd10_first_3_name_short")
+for(dir in paste0('subCancerX_Control/Control-',cancer.type)){
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
 }
 
 
-
 ############################## sub Cancer X vs [Cancers-sub Cancer X] #######################################
-wd <- '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/'
-rd <- '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/Result/subCancerX-Ex/'
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
 
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/subCancerX-Ex/')
+
+if(!dir.exists(rd)) dir.create(rd)
 setwd(wd)
-source('Code/Stats.R')
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
 try(load_package())
 
 load(file = 'Data/data.obj.raw.core.RData') 
+
 data.obj2 <- data.obj
 data.obj.rff2 <- data.obj.rff
 dist.obj2 <- dist.obj
 dist.obj.rff2 <- dist.obj.rff
 
-data.obj$meta.dat$icd10_first_3_name <- as.character(data.obj$meta.dat$icd10_first_3_name)
-
-idx <- names(which(sort(table(data.obj$meta.dat$icd10_first_3_name))>15)) 
-samIDs <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name %in% idx & data.obj$meta.dat$Group != 'Control',])
-data.obj <- subset_data(data.obj, samIDs = samIDs)
-dist.obj <- subset_dist(dist.obj, samIDs = samIDs)
-
-data.obj.rff$meta.dat$icd10_first_3_name <- as.character(data.obj.rff$meta.dat$icd10_first_3_name)
-samIDs <- rownames(data.obj.rff$meta.dat[data.obj.rff$meta.dat$icd10_first_3_name %in% idx & data.obj.rff$meta.dat$Group != 'Control',])
-data.obj.rff <- subset_data(data.obj.rff, samIDs = samIDs)
-dist.obj.rff <- subset_dist(dist.obj.rff, samIDs = samIDs)
-
-data.obj$meta.dat$icd10_first_3_name <- as.factor(data.obj$meta.dat$icd10_first_3_name)
-data.obj.rff$meta.dat$icd10_first_3_name <- as.factor(data.obj.rff$meta.dat$icd10_first_3_name)
-
-cancer.type <- as.vector(unique(data.obj$meta.dat$icd10_first_3_name)[!is.na(unique(data.obj$meta.dat$icd10_first_3_name))])
-
-cancer.dir <- gsub('Malignant neoplasm of |Multiple myeloma and malignant |Malignant ','',cancer.type)
-cancer.dir <- gsub('Other\\ and\\ |malignant\\ ','',cancer.dir)
-cancer.dir <- gsub('__','_',gsub(',|\\ ','_',cancer.dir))
-cancer.dir <- gsub('eye_brain_and_other_parts_of_|_and','',cancer.dir)
-setwd(rd)
+cancer.type <- names(which(sort(table(data.obj$meta.dat$icd10_first_3_name_short))>15)) 
+cancer.type <- cancer.type[cancer.type!='healthy']
 
 for(i in 1:length(cancer.type)){
+  setwd(rd)
   cancer <- cancer.type[i]
   cat('[',cancer,']\n')
-  dir <- cancer.dir[i]
+  dir <- cancer.type[i]
   if(!dir.exists(dir)){dir.create(dir)}
   setwd(dir)
   getwd()
@@ -266,168 +382,164 @@ for(i in 1:length(cancer.type)){
   data.obj.rff <- data.obj.rff2
   dist.obj <- dist.obj2
   dist.obj.rff <- dist.obj.rff2
-  
-  idx <- names(which(sort(table(data.obj$meta.dat$icd10_first_3_name))>15)) 
 
-  samIDs <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name %in% idx & data.obj$meta.dat$Group != 'Control',])
+  data.obj$meta.dat$icd10_first_3_name_short <- as.character(data.obj$meta.dat$icd10_first_3_name_short)
+  samIDs <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name_short %in% cancer.type,])
   data.obj <- subset_data(data.obj, samIDs = samIDs)
   dist.obj <- subset_dist(dist.obj, samIDs = samIDs)
   
-  data.obj.rff$meta.dat$icd10_first_3_name <- as.character(data.obj.rff$meta.dat$icd10_first_3_name)
-  samIDs <- rownames(data.obj.rff$meta.dat[data.obj.rff$meta.dat$icd10_first_3_name %in% idx & data.obj.rff$meta.dat$Group != 'Control',])
+  data.obj.rff$meta.dat$icd10_first_3_name_short <- as.character(data.obj.rff$meta.dat$icd10_first_3_name_short)
+  samIDs <- rownames(data.obj.rff$meta.dat[data.obj.rff$meta.dat$icd10_first_3_name_short %in% cancer.type,])
   data.obj.rff <- subset_data(data.obj.rff, samIDs = samIDs)
   dist.obj.rff <- subset_dist(dist.obj.rff, samIDs = samIDs)
   
-  data.obj$meta.dat$icd10_first_3_name <- as.character(data.obj$meta.dat$icd10_first_3_name)
-
-  cancer.type <- as.vector(unique(data.obj$meta.dat$icd10_first_3_name)[!is.na(unique(data.obj$meta.dat$icd10_first_3_name))])
+  data.obj$meta.dat$icd10_first_3_name_short <- as.factor(data.obj$meta.dat$icd10_first_3_name_short)
+  data.obj.rff$meta.dat$icd10_first_3_name_short <- as.factor(data.obj.rff$meta.dat$icd10_first_3_name_short)
   
-  samIDs <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name %in% cancer.type & data.obj$meta.dat$Group != 'Control',])
-  data.obj <- subset_data(data.obj, samIDs = samIDs)
-  dist.obj <- subset_dist(dist.obj, samIDs = samIDs)
-  
-  samIDs <- rownames(data.obj.rff$meta.dat[data.obj.rff$meta.dat$icd10_first_3_name %in% cancer.type & data.obj.rff$meta.dat$Group != 'Control',])
-  data.obj.rff <- subset_data(data.obj.rff, samIDs = samIDs)
-  dist.obj.rff <- subset_dist(dist.obj.rff, samIDs = samIDs)
-  
-  data.obj$meta.dat$icd10_first_3_name <- as.factor(data.obj$meta.dat$icd10_first_3_name)
-  data.obj.rff$meta.dat$icd10_first_3_name <- as.factor(data.obj.rff$meta.dat$icd10_first_3_name)
-  
-  idx <- !(data.obj$meta.dat$icd10_first_3_name %in% c(cancer))
-  data.obj$meta.dat$icd10_first_3_name <- as.character(data.obj$meta.dat$icd10_first_3_name)
-  data.obj$meta.dat$icd10_first_3_name[idx] <- 'Others'
+  idx <- !(data.obj$meta.dat$icd10_first_3_name_short %in% c(cancer))
+  data.obj$meta.dat$icd10_first_3_name_short <- as.character(data.obj$meta.dat$icd10_first_3_name_short)
+  data.obj$meta.dat$icd10_first_3_name_short[idx] <- 'Others'
   dist.obj <- subset_dist(dist.obj, samIDs = rownames(data.obj$meta.dat))
   
-  idx <- !(data.obj.rff$meta.dat$icd10_first_3_name %in% c(cancer))
-  data.obj.rff$meta.dat$icd10_first_3_name <- as.character(data.obj.rff$meta.dat$icd10_first_3_name)
-  data.obj.rff$meta.dat$icd10_first_3_name[idx] <- 'Others'
+  idx <- !(data.obj.rff$meta.dat$icd10_first_3_name_short %in% c(cancer))
+  data.obj.rff$meta.dat$icd10_first_3_name_short <- as.character(data.obj.rff$meta.dat$icd10_first_3_name_short)
+  data.obj.rff$meta.dat$icd10_first_3_name_short[idx] <- 'Others'
   dist.obj.rff <- subset_dist(dist.obj.rff, samIDs = rownames(data.obj.rff$meta.dat))
   cat(sum(idx),'\n')
-  table(data.obj.rff$meta.dat$icd10_first_3_name)
   
-  data.obj$meta.dat$icd10_first_3_name <- factor(data.obj$meta.dat$icd10_first_3_name,levels=c('Others',cancer))
-  data.obj.rff$meta.dat$icd10_first_3_name <- factor(data.obj.rff$meta.dat$icd10_first_3_name,levels=c('Others',cancer))
+  data.obj$meta.dat$icd10_first_3_name_short <- factor(data.obj$meta.dat$icd10_first_3_name_short,levels=c('Others',cancer))
+  data.obj.rff$meta.dat$icd10_first_3_name_short <- factor(data.obj.rff$meta.dat$icd10_first_3_name_short,levels=c('Others',cancer))
+  table(data.obj.rff$meta.dat$icd10_first_3_name_short)
   
   save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
-  setwd('..')
   gc()
 }
 
-
-
-variables <- c("icd10_first_3_name")
-for(dir in paste0('subCancerX-Ex/',cancer.dir)){
-  for(variable in variables){
-    sh <- paste(
-      "sbatch",
-      paste0("-J ", variable,'-',gsub('subCancerX-Ex/','',dir)),
-      "--partition=cpu-short",
-      paste("--output=/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/OUT/",  variable, "_",gsub('subCancerX-Ex/','',dir),".out", sep=""),
-      paste("--error=/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/OUT/",  variable,"_",gsub('subCancerX-Ex/','',dir),".err", sep=""),
-      "--time=1-00:00:00",
-      "--mem=64G",
-      "--export=ALL",
-      paste("\'--wrap=R CMD BATCH --no-restore \"--args ", variable," ",dir,"\" ",
-            "/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/Code/Alpha_Beta_DAA_clean.R", " ", paste0("/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/",variable,"_",gsub('subCancerX-Ex/','',dir),".Rout"), "\'", sep="")
-    )
-    print(sh)
-    system(sh)
-  }
+variable <- c("icd10_first_3_name_short")
+for(dir in paste0('subCancerX-Ex/',cancer.type)){
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
 }
 
 
+# setwd("/Users/luyang1/myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Result/subCancerX-Ex/")
+# dirs <- list.dirs(recursive = F,full.names = F)
+# xx <- NULL
+# for(dir in dirs){
+#   diff.obj <- NULL
+#   load(paste0(dir,'/DAA/icd10_first_3_name_short/icd10_first_3_name_short_ZicoSeq.Rdata'))
+#   x <- colnames(diff.obj$coef.list$Species)[grep('icd10_first_3_name_short',colnames(diff.obj$coef.list$Species))]
+#   if(grepl('1$',x)) xx <- c(xx, dir)
+# }
+# xx
+############################## Pan-Cancer #######################################
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
 
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
 
-
-
-############################## Control vs sub Cancer X [PERMANOVA]##############################
-wd <- '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/'
-rd <- '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/Result/subCancerX_Control/'
-fd <- '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/Figure/subCancerX_Control/'
-
+if(!dir.exists(rd)) dir.create(rd)
 setwd(wd)
-source('Code/Stats.R')
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
 try(load_package())
+
 load(file = 'Data/data.obj.raw.core.RData') 
-data.obj2 <- data.obj
-data.obj.rff2 <- data.obj.rff
-dist.obj2 <- dist.obj
-dist.obj.rff2 <- dist.obj.rff
 
-data.obj$meta.dat$icd10_first_3_name <- as.character(data.obj$meta.dat$icd10_first_3_name)
-data.obj$meta.dat$icd10_first_3_name[data.obj$meta.dat$Group == 'Control'] <- 'Control'
-samIDs <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name %in% names(which(sort(table(data.obj$meta.dat$icd10_first_3_name))>15)),])
-data.obj <- subset_data(data.obj, samIDs = samIDs)
-dist.obj <- subset_dist(dist.obj, samIDs = samIDs)
-
-data.obj.rff$meta.dat$icd10_first_3_name <- as.character(data.obj.rff$meta.dat$icd10_first_3_name)
-data.obj.rff$meta.dat$icd10_first_3_name[data.obj.rff$meta.dat$Group == 'Control'] <- 'Control'
-samIDs <- rownames(data.obj.rff$meta.dat[data.obj.rff$meta.dat$icd10_first_3_name %in% names(which(sort(table(data.obj.rff$meta.dat$icd10_first_3_name))>15)),])
-data.obj.rff <- subset_data(data.obj.rff, samIDs = samIDs)
-dist.obj.rff <- subset_dist(dist.obj.rff, samIDs = samIDs)
-
-data.obj$meta.dat$icd10_first_3_name <- as.factor(data.obj$meta.dat$icd10_first_3_name)
-data.obj.rff$meta.dat$icd10_first_3_name <- as.factor(data.obj.rff$meta.dat$icd10_first_3_name)
-
-cancer.type <- as.vector(unique(data.obj$meta.dat$icd10_first_3_name)[!is.na(unique(data.obj$meta.dat$icd10_first_3_name))])
-
-cancer.dir <- gsub('Malignant neoplasm of |Multiple myeloma and malignant |Malignant ','',cancer.type)
-cancer.dir <- gsub('__','_',gsub(',|\\ ','_',cancer.dir))
-cancer.dir <- gsub('eye_brain_and_other_parts_of_|_and','',cancer.dir)
 setwd(rd)
+dir <- 'PanCancer'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
 
-dist.names <- c('UniFrac', 'GUniFrac', 'WUniFrac', 'BC')
-## Use DMANOVA
-r2.unadj.mat <- pv.unadj.mat <-
-  array(NA, c(length(cancer.dir), length(cancer.dir),length(dist.names)),
-        dimnames = list(cancer.dir, cancer.dir, dist.names))
-variable <- 'icd10_first_3_name'
-for(i in 1:(length(cancer.type)-1)){
-  for(j in (i+1):length(cancer.type)){
-    if(i != j ){
-      ind <- data.obj.rff$meta.dat$icd10_first_3_name %in% c(cancer.type[i],cancer.type[j])
-      data.obj.rff3 <- subset_data(data.obj.rff, ind)
-      dist.obj.rff3 <- subset_dist(dist.obj.rff, ind)
-      for(dist.name in dist.names){
-        obj <- dmanova(as.dist(dist.obj.rff3[[dist.name]]) ~ data.obj.rff3$meta.dat[, variable])
-        r2.unadj.mat[cancer.dir[i],cancer.dir[j],dist.name] <- obj$aov.tab[1,5]
-        pv.unadj.mat[cancer.dir[i],cancer.dir[j],dist.name] <- obj$aov.tab[1,6]
-      }
-    }
-  }
+data.obj$meta.dat$Cancer_class <- as.character(data.obj$meta.dat$Cancer_class)
+data.obj$meta.dat$Cancer_class[data.obj$meta.dat$Group=='Control'] <- 'Control'
+
+data.obj.rff$meta.dat$Cancer_class <- as.character(data.obj.rff$meta.dat$Cancer_class)
+data.obj.rff$meta.dat$Cancer_class[data.obj.rff$meta.dat$Group=='Control'] <- 'Control'
+
+data.obj$meta.dat$Group <- factor(data.obj$meta.dat$Group,levels=c('Control','Cancer'))
+data.obj.rff$meta.dat$Group <- factor(data.obj.rff$meta.dat$Group,levels=c('Control','Cancer'))
+
+save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
+
+variable <- "Group"; dir <- 'PanCancer'
+with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
+
+
+############################## early onset #######################################
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+if(!dir.exists(rd)) dir.create(rd)
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+
+load(file = 'Data/data.obj.raw.core.RData') 
+
+ind <- data.obj$meta.dat$Group == 'Cancer'
+data.obj2 <- subset_data(data.obj, ind)
+dist.obj2 <- subset_dist(dist.obj, ind)
+
+ind <- data.obj.rff$meta.dat$Group == 'Cancer'
+data.obj.rff2 <- subset_data(data.obj.rff, ind)
+dist.obj.rff2 <- subset_dist(dist.obj.rff, ind)
+
+setwd(rd)
+dir <- 'EarlyOnset'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
+
+tb <- cbind(table(data.obj.rff2$meta.dat$icd10_first_3_name_short, data.obj.rff2$meta.dat$early_onset))
+idx <- names(which(rowSums(tb >15) ==2))
+for(j in idx){
+  setwd(paste0(rd,'EarlyOnset'))
+  if(!dir.exists(j)){dir.create(j)}
+  setwd(j)
+  getwd()
+  
+  data.obj <- data.obj2
+  data.obj.rff <- data.obj.rff2
+  dist.obj <- dist.obj2
+  dist.obj.rff <- dist.obj.rff2
+  
+  ind2 <- data.obj.rff$meta.dat$icd10_first_3_name_short == j
+  data.obj.rff <- subset_data(data.obj.rff, ind2)
+  dist.obj.rff <- subset_dist(dist.obj.rff, ind2)
+  
+  ind2 <- data.obj$meta.dat$icd10_first_3_name_short == j
+  data.obj <- subset_data(data.obj, ind2)
+  dist.obj <- subset_dist(dist.obj, ind2)
+  table(data.obj$meta.dat$early_onset)
+  
+  save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
+
 }
-setwd(fd)
-save(r2.unadj.mat, pv.unadj.mat, file = 'r2.p.unadj.mat.Rdata')
 
 
-## Since DMANOVA does not support small smaple size(some subcancer type), I try permanova to see.
-r2.unadj.mat <- pv.unadj.mat <-
-  array(NA, c(length(cancer.dir), length(cancer.dir),length(dist.names)),
-        dimnames = list(cancer.dir, cancer.dir, dist.names))
-variable <- 'icd10_first_3_name'
-for(i in 1:(length(cancer.type)-1)){
-  for(j in (i+1):length(cancer.type)){
-    if(i != j ){
-      ind <- data.obj.rff$meta.dat$icd10_first_3_name %in% c(cancer.type[i],cancer.type[j])
-      data.obj.rff3 <- subset_data(data.obj.rff, ind)
-      dist.obj.rff3 <- subset_dist(dist.obj.rff, ind)
-      for(dist.name in dist.names){
-        obj <- adonis(as.dist(dist.obj.rff3[[dist.name]]) ~ data.obj.rff3$meta.dat[, variable])
-        r2.unadj.mat[cancer.dir[i],cancer.dir[j],dist.name] <- obj$aov.tab[1,'R2']
-        pv.unadj.mat[cancer.dir[i],cancer.dir[j],dist.name] <- obj$aov.tab[1,'Pr(>F)']
-      }
-    }
-  }
+variable <- 'early_onset'
+for(dir in paste0('EarlyOnset/',idx)){
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
 }
-setwd(fd)
-save(r2.unadj.mat, pv.unadj.mat, file = 'r2.p.unadj.mat_permanova.Rdata')
+
+
+
+
 
 ##---------------------------- functional data analysis-----------------------------------
 ############################## Cancer Only func #######################################
-wd <- '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/'
-rd <- '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/Result/'
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
 setwd(wd)
-source('Code/Stats.R')
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
 try(load_package())
 
 setwd(wd)
@@ -443,59 +555,14 @@ getwd()
 if(!dir.exists(func.type)){dir.create(func.type)}
 setwd(func.type)
 
-
 ind <- data.obj$meta.dat$Group == 'Cancer'
 data.obj <- subset_data(data.obj, ind)
 dist.obj <- subset_dist(dist.obj, ind)
-
-ind <- data.obj.rff$meta.dat$Group == 'Cancer'
-data.obj.rff <- subset_data(data.obj.rff, ind)
-dist.obj.rff <- subset_dist(dist.obj.rff, ind)
-
-# par(mfrow = c(3,3))
-# for(i in c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')){
-#   print(hist(as.numeric(data.obj$meta.dat[,i])))
-# }
-
-## transform blood related variables into normal distributed
-data.obj$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')] <- as.data.frame(sapply(data.obj$meta.dat[,c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')], as.numeric)) %>% 
-  `rownames<-`(rownames(data.obj$meta.dat)) 
-data.obj.rff$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')] <- as.data.frame(sapply(data.obj.rff$meta.dat[,c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')], as.numeric)) %>% 
-  `rownames<-`(rownames(data.obj.rff$meta.dat))  
-
-data.obj$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')] <- apply(data.obj$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')], 2, function(x){
-  x[!is.na(x)] <- winzor(x[!is.na(x)], winsor.end = 'both')
-  return(x)
-})
-data.obj.rff$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')] <- apply(data.obj.rff$meta.dat[c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count')], 2, function(x){
-  x[!is.na(x)] <- winzor(x[!is.na(x)], winsor.end = 'both')
-  return(x)
-})
-
-data.obj$meta.dat <- data.obj$meta.dat %>% mutate(Neutrophils = log2(Neutrophils), Leukocytes = log2(Leukocytes), Platelet.Count = log2(Platelet.Count))
-data.obj.rff$meta.dat <- data.obj.rff$meta.dat %>% mutate(Neutrophils = log2(Neutrophils), Leukocytes = log2(Leukocytes), Platelet.Count = log2(Platelet.Count))
-
-## transform blood related variables into binary format
-data.obj$meta.dat$Neutrophils_cat <- as.factor(ifelse(is.na(data.obj$meta.dat$Neutrophils_cat),NA, ifelse(data.obj$meta.dat$Neutrophils_cat =='No','No','Yes')))
-data.obj$meta.dat$Platelet.Count_cat <- as.factor(ifelse(is.na(data.obj$meta.dat$Platelet.Count_cat),NA, ifelse(data.obj$meta.dat$Platelet.Count_cat =='No','No','Yes')))
-data.obj$meta.dat$Hemoglobin_cat <- as.factor(ifelse(is.na(data.obj$meta.dat$Hemoglobin_cat),NA, ifelse(data.obj$meta.dat$Hemoglobin_cat =='No','No','Yes')))
-
-data.obj.rff$meta.dat$Neutrophils_cat <- as.factor(ifelse(is.na(data.obj.rff$meta.dat$Neutrophils_cat),NA, ifelse(data.obj.rff$meta.dat$Neutrophils_cat =='No','No','Yes')))
-data.obj.rff$meta.dat$Platelet.Count_cat <- as.factor(ifelse(is.na(data.obj.rff$meta.dat$Platelet.Count_cat),NA, ifelse(data.obj.rff$meta.dat$Platelet.Count_cat =='No','No','Yes')))
-data.obj.rff$meta.dat$Hemoglobin_cat <- as.factor(ifelse(is.na(data.obj.rff$meta.dat$Hemoglobin_cat),NA, ifelse(data.obj.rff$meta.dat$Hemoglobin_cat =='No','No','Yes')))
-
-elix.names <- colnames(data.obj$meta.dat)[grep('Elixhauser_',colnames(data.obj$meta.dat))]
-elix.names <- elix.names[!(elix.names %in% c("Elixhauser_dtindex","Elixhauser_elix.sum"))]
-
-data.obj$meta.dat$GI_nonGI <- factor(data.obj$meta.dat$GI_nonGI,levels=c('non_GI','GI'))
-data.obj.rff$meta.dat$GI_nonGI <- factor(data.obj.rff$meta.dat$GI_nonGI,levels=c('non_GI','GI'))
-
-
-save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
+save(data.obj, dist.obj, file = 'data.obj.wk.RData')
 
 
 covars <- c("Batch","Bristol_score","BMI", "Age", "Sex", "GI_nonGI","Cancer_class","Metastasis","PPI_day_365", "Abx_day_365",
-            "PPI_last_month","Abx_last_month","Charlson_score","Elix_score","Sample_season","Urban","icd10_first_3_name")
+            "PPI_last_month","Abx_last_month","Charlson_score","Elix_score","Sample_season","Urban","icd10_first_3_name_short", "Site")
 blood.names <- c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count',
                  'Neutrophils_cat','Platelet.Count_cat','Hemoglobin_cat',
                  "neut_neutropenia2","bone_marrow_suppression2","Hb_anemia2","Pl_thrombocytopenia2","neut_neutropenia_c","Hb_anemia_c","Pl_thrombocytopenia_c")
@@ -504,154 +571,254 @@ elix.names <- c("Elixhauser_CHF","Elixhauser_Arrhythmia","Elixhauser_Valvular","
                 "Elixhauser_PUD" ,"Elixhauser_HIV","Elixhauser_Lymphoma","Elixhauser_Mets","Elixhauser_Tumor","Elixhauser_Rheumatic","Elixhauser_Coagulopathy",
                 "Elixhauser_Obesity","Elixhauser_WeightLoss","Elixhauser_FluidsLytes","Elixhauser_BloodLoss","Elixhauser_Anemia","Elixhauser_Alcohol","Elixhauser_Drugs",
                 "Elixhauser_Psychoses","Elixhauser_Depression")
-charlson.names <- c("Charlson_MI","Charlson_CHF","Charlson_PVD","Charlson_Stroke","Charlson_Dementia","Charlson_Pulmonary","Charlson_Rheumatic",  
-                    "Charlson_PUD","Charlson_LiverMild","Charlson_DM","Charlson_DMcx","Charlson_Paralysis","Charlson_Renal","Charlson_Cancer",     
-                    "Charlson_LiverSevere","Charlson_Mets","Charlson_HIV")
 
-variables <- c(covars, blood.names, elix.names)
+variables <- c(covars[!(covars %in% c("Batch"))], blood.names, elix.names)
 
 dir <- paste0('CancerOnly_func/',func.type)
+
 for(variable in variables){
-  sh <- paste(
-    "sbatch",
-    paste0("-J ", variable),
-    "--partition=cpu-short",
-    paste("--output=/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/OUT/",  variable, "_",gsub('\\/','',dir),".out", sep=""),
-    paste("--error=/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/OUT/",  variable,"_",gsub('\\/','',dir),".err", sep=""),
-    "--time=1-00:00:00",
-    "--mem=64G",
-    "--export=ALL",
-    paste("\'--wrap=R CMD BATCH --no-restore \"--args ", variable," ",dir,"\" ",
-          "/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/Code/Alpha_Beta_DAA_func_clean.R", " ", paste0("/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/",variable,"_",gsub('\\/','',dir),".Rout"), "\'", sep="")
-  )
-  
-  print(sh)
-  system(sh)
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(func_script))
 }
 
-
-
-
-
+# setwd("/Users/luyang1/myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Result/CancerOnly_func/pathway/DAA/")
+# dirs <- list.dirs(recursive = F,full.names = F)
+# xx <- NULL
+# for(dir in dirs){
+#   diff.obj <- NULL
+#   load(paste0(dir,'/',dir,'_ZicoSeq.Rdata'))
+#   x <- colnames(diff.obj$coef.list$pathway)[grep(dir,colnames(diff.obj$coef.list$pathway))]
+#   if(sum(grepl('1$',x))>0) xx <- c(xx, dir)
+# }
+# 
+# variables <- xx
 
 ############################## sub Cancer X vs [Cancers-sub Cancer X] func #######################################
-# wd <- '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/'
-# rd <- '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/Result/subCancerX-Ex2_func/'
-wd <- '/Users/luyang1//myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/'
-rd <- '/Users/luyang1//myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Result/subCancerX-Ex2_func/'
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/subCancerX-Ex_func/')
+if(!dir.exists(rd)){dir.create(rd)}
 setwd(wd)
-source('Code/Stats.R')
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
 try(load_package())
-for(func.type in c('pathway')){#'uniref90_ko','uniref90_go','uniref90_level4ec',
-  setwd(wd)
-  load(file = paste0('Data/data.obj.',func.type,'.RData')) 
-  
-  data.obj2 <- data.obj
-  dist.obj2 <- dist.obj
-  
-  data.obj$meta.dat$icd10_first_3_name <- as.character(data.obj$meta.dat$icd10_first_3_name)
-  samIDs <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name %in% names(which(sort(table(data.obj$meta.dat$icd10_first_3_name))>15)) & data.obj$meta.dat$Group != 'Control',])
-  data.obj <- subset_data(data.obj, samIDs = samIDs)
-  dist.obj <- subset_dist(dist.obj, samIDs = samIDs)
-  data.obj$meta.dat$icd10_first_3_name <- as.factor(data.obj$meta.dat$icd10_first_3_name)
-  cancer.type <- as.vector(unique(data.obj$meta.dat$icd10_first_3_name)[!is.na(unique(data.obj$meta.dat$icd10_first_3_name))])
-  # cancer.type <- cancer.type[-grep('ther',cancer.type)] # exclude 2 cancer types Ruben mentioned not to include
-  
-  samIDs <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name %in% cancer.type & data.obj$meta.dat$Group != 'Control',])
-  data.obj <- subset_data(data.obj, samIDs = samIDs)
-  dist.obj <- subset_dist(dist.obj, samIDs = samIDs)
-  
-  cancer.dir <- gsub('Malignant neoplasm of |Multiple myeloma and malignant |Malignant ','',cancer.type)
-  cancer.dir <- gsub('Other\\ and\\ |malignant\\ ','',cancer.dir)## add 2024/10/31 for adding 2 other cancer back
-  cancer.dir <- gsub('__','_',gsub(',|\\ ','_',cancer.dir))
-  cancer.dir <- gsub('eye_brain_and_other_parts_of_|_and','',cancer.dir)
-  
-  
-  for(i in 1:length(cancer.type)){
-    setwd(rd)
-    if(!dir.exists(func.type)){dir.create(func.type)}
-    setwd(func.type)
-    cancer <- cancer.type[i]
-    cat('[',cancer,']\n')
-    dir <- cancer.dir[i]
-    if(!dir.exists(dir)){dir.create(dir)}
-    setwd(dir)
-    getwd()
-    
-    data.obj <- data.obj2
-    dist.obj <- dist.obj2
-    
-    data.obj$meta.dat$icd10_first_3_name <- as.character(data.obj$meta.dat$icd10_first_3_name)
-    samIDs <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name %in% names(which(sort(table(data.obj$meta.dat$icd10_first_3_name))>15)) & data.obj$meta.dat$Group != 'Control',])
-    data.obj <- subset_data(data.obj, samIDs = samIDs)
-    dist.obj <- subset_dist(dist.obj, samIDs = samIDs)
-    data.obj$meta.dat$icd10_first_3_name <- as.factor(data.obj$meta.dat$icd10_first_3_name)
-    
-    samIDs <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name %in% cancer.type & data.obj$meta.dat$Group != 'Control',])
-    data.obj <- subset_data(data.obj, samIDs = samIDs)
-    dist.obj <- subset_dist(dist.obj, samIDs = samIDs)
-    
-    
-    idx <- !(data.obj$meta.dat$icd10_first_3_name %in% c(cancer))
-    data.obj$meta.dat$icd10_first_3_name <- as.character(data.obj$meta.dat$icd10_first_3_name)
-    data.obj$meta.dat$icd10_first_3_name[idx] <- 'Others'
-    dist.obj <- subset_dist(dist.obj, samIDs = rownames(data.obj$meta.dat))
-    
-    data.obj$meta.dat$icd10_first_3_name <- factor(data.obj$meta.dat$icd10_first_3_name,levels=c('Others',cancer))
-    
-    save(data.obj, dist.obj, file = 'data.obj.wk.RData')
-    gc()
-  }
-}
+func.type <- 'pathway'
+setwd(wd)
+load(file = paste0('Data/data.obj.',func.type,'.RData')) 
 
+data.obj2 <- data.obj
+dist.obj2 <- dist.obj
 
-for(func.type in c('pathway')){#'uniref90_ko','uniref90_go','uniref90_level4ec',
-  setwd(wd)
-  load(file = paste0('Data/data.obj.',func.type,'.RData')) 
-  
-  data.obj2 <- data.obj
-  dist.obj2 <- dist.obj
-  
-  data.obj$meta.dat$icd10_first_3_name <- as.character(data.obj$meta.dat$icd10_first_3_name)
-  samIDs <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name %in% names(which(sort(table(data.obj$meta.dat$icd10_first_3_name))>15)) & data.obj$meta.dat$Group != 'Control',])
-  data.obj <- subset_data(data.obj, samIDs = samIDs)
-  dist.obj <- subset_dist(dist.obj, samIDs = samIDs)
-  
-  data.obj$meta.dat$icd10_first_3_name <- as.factor(data.obj$meta.dat$icd10_first_3_name)
-  
-  cancer.type <- as.vector(unique(data.obj$meta.dat$icd10_first_3_name)[!is.na(unique(data.obj$meta.dat$icd10_first_3_name))])
-  
-  cancer.dir <- gsub('Malignant neoplasm of |Multiple myeloma and malignant |Malignant ','',cancer.type)
-  cancer.dir <- gsub('Other\\ and\\ |malignant\\ ','',cancer.dir)## add 2024/10/31 for adding 2 other cancer back
-  cancer.dir <- gsub('__','_',gsub(',|\\ ','_',cancer.dir))
-  cancer.dir <- gsub('eye_brain_and_other_parts_of_|_and','',cancer.dir)
+## find out the cancer types with N>15
+data.obj$meta.dat$icd10_first_3_name_short <- as.character(data.obj$meta.dat$icd10_first_3_name_short)
+samIDs <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name_short %in% names(which(sort(table(data.obj$meta.dat$icd10_first_3_name_short))>15)) & data.obj$meta.dat$Group != 'Control',])
+data.obj <- subset_data(data.obj, samIDs = samIDs)
+dist.obj <- subset_dist(dist.obj, samIDs = samIDs)
+data.obj$meta.dat$icd10_first_3_name_short <- as.factor(data.obj$meta.dat$icd10_first_3_name_short)
+cancer.type <- as.vector(unique(data.obj$meta.dat$icd10_first_3_name_short))
+length(cancer.type)
+
+for(i in 1:length(cancer.type)){
+  setwd(rd)
+  if(!dir.exists(func.type)){dir.create(func.type)}
+  setwd(func.type)
+  cancer <- cancer.type[i]
+  cat('[',cancer,']\n')
+  dir <- cancer.type[i]
+  if(!dir.exists(dir)){dir.create(dir)}
+  setwd(dir)
   getwd()
   
+  data.obj <- data.obj2
+  dist.obj <- dist.obj2
+
+  data.obj$meta.dat$icd10_first_3_name_short <- as.character(data.obj$meta.dat$icd10_first_3_name_short)
+  samIDs <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name_short %in% names(which(sort(table(data.obj$meta.dat$icd10_first_3_name_short))>15)) & data.obj$meta.dat$Group != 'Control',])
+  data.obj <- subset_data(data.obj, samIDs = samIDs)
+  dist.obj <- subset_dist(dist.obj, samIDs = samIDs)
+  data.obj$meta.dat$icd10_first_3_name_short <- as.factor(data.obj$meta.dat$icd10_first_3_name_short)
   
-  variables <- c("icd10_first_3_name")
-  for(dir in paste0('subCancerX-Ex2_func/',func.type,'/',cancer.dir)){
-    for(variable in variables){
-      
-      sh <- paste(
-        "sbatch",
-        paste0("-J ", variable),
-        "--partition=cpu-short",
-        paste("--output=/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/OUT/",  variable, "_",gsub('\\/','_',dir),".out", sep=""),
-        paste("--error=/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/OUT/",  variable,"_",gsub('\\/','_',dir),".err", sep=""),
-        "--time=1-00:00:00",
-        "--mem=64G",
-        "--export=ALL",
-        paste("\'--wrap=R CMD BATCH --no-restore \"--args ", variable," ",dir,"\" ",
-              "/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/Code/Alpha_Beta_DAA_func_clean.R", " ", paste0("/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/trash/",variable,"_",gsub('\\/','_',dir),".Rout"), "\'", sep="")
-      )
-      print(sh)
-      system(sh)
-    }
-  }
+  idx <- !(data.obj$meta.dat$icd10_first_3_name_short %in% c(cancer))
+  data.obj$meta.dat$icd10_first_3_name_short <- as.character(data.obj$meta.dat$icd10_first_3_name_short)
+  data.obj$meta.dat$icd10_first_3_name_short[idx] <- 'Others'
   
+  dist.obj <- subset_dist(dist.obj, samIDs = rownames(data.obj$meta.dat))
+  data.obj$meta.dat$icd10_first_3_name_short <- factor(data.obj$meta.dat$icd10_first_3_name_short,levels=c('Others',cancer))
+  
+  save(data.obj, dist.obj, file = 'data.obj.wk.RData')
+  gc()
+}
+
+
+getwd()
+variable <- c("icd10_first_3_name_short")
+for(dir in paste0('subCancerX-Ex_func/',func.type,'/',cancer.type)){
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(func_script))
+}
+  
+# setwd("/Users/luyang1/myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Result/subCancerX-Ex_func/pathway/")
+# dirs <- list.dirs(recursive = F,full.names = F)
+# xx <- NULL
+# for(dir in dirs){
+#   diff.obj <- NULL
+#   load(paste0(dir,'/DAA/icd10_first_3_name_short/icd10_first_3_name_short_ZicoSeq.Rdata'))
+#   x <- colnames(diff.obj$coef.list$pathway)[grep('icd10_first_3_name_short',colnames(diff.obj$coef.list$pathway))]
+#   if(grepl('1$',x)) xx <- c(xx, dir)
+# }
+# xx
+
+############################## sub Cancer X vs Control#######################################
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/subCancerX_Control_func/')
+
+if(!dir.exists(rd)) dir.create(rd)
+
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+func.type <- 'pathway'
+setwd(wd)
+load(file = paste0('Data/data.obj.',func.type,'.RData')) 
+
+data.obj2 <- data.obj
+dist.obj2 <- dist.obj
+
+data.obj$meta.dat$icd10_first_3_name_short <- as.character(data.obj$meta.dat$icd10_first_3_name_short)
+samIDs <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name_short %in% names(which(sort(table(data.obj$meta.dat$icd10_first_3_name_short))>15)),])
+data.obj <- subset_data(data.obj, samIDs = samIDs)
+
+cancer.type <- as.vector(unique(data.obj$meta.dat$icd10_first_3_name_short)[!is.na(unique(data.obj$meta.dat$icd10_first_3_name_short))])
+cancer.type <- cancer.type[!(cancer.type %in% 'healthy')]
+
+for(i in 1:length(cancer.type)){
+  setwd(rd)
+  if(!dir.exists(func.type)){dir.create(func.type)}
+  setwd(func.type)
+  cancer <- cancer.type[i]
+  cat('[',cancer,']\n')
+  dir <- cancer.type[i]
+  if(!dir.exists(dir)){dir.create(dir)}
+  setwd(dir)
+  getwd()
+  
+  data.obj <- data.obj2
+  dist.obj <- dist.obj2
+  
+  data.obj$meta.dat$icd10_first_3_name_short <- as.character(data.obj$meta.dat$icd10_first_3_name_short)
+  samIDs <- rownames(data.obj$meta.dat)[data.obj$meta.dat$icd10_first_3_name_short %in% c(cancer,'healthy')]
+  data.obj <- subset_data(data.obj, samIDs = samIDs)
+  dist.obj <- subset_dist(dist.obj, samIDs = samIDs)
+  # data.obj$meta.dat$icd10_first_3_name_short <- as.factor(data.obj$meta.dat$icd10_first_3_name_short)
+  data.obj$meta.dat$icd10_first_3_name_short <- factor(data.obj$meta.dat$icd10_first_3_name_short,levels=c('healthy',cancer))
+  
+  save(data.obj, dist.obj, file = 'data.obj.wk.RData')
+  gc()
+}
+
+
+variable <- c("icd10_first_3_name_short")
+for(dir in paste0('subCancerX_Control_func/',func.type,'/',cancer.type)){
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(func_script))
+}
+
+# setwd("/Users/luyang1/myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Result/subCancerX_Control_func/pathway/")
+# dirs <- list.dirs(recursive = F,full.names = F)
+# xx <- NULL
+# for(dir in dirs){
+#   diff.obj <- NULL
+#   load(paste0(dir,'/DAA/icd10_first_3_name_short/icd10_first_3_name_short_ZicoSeq.Rdata'))
+#   x <- colnames(diff.obj$coef.list$pathway)[grep('icd10_first_3_name_short',colnames(diff.obj$coef.list$pathway))]
+#   if(grepl('1$',x)) xx <- c(xx, dir)
+# }
+# cancer.type <- cancer.type[cancer.type %in% gsub('Control-','',xx)]
+
+############################## early onset func #######################################
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+
+setwd(rd)
+dir <- 'EarlyOnset_func'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
+load(file = paste0('../../Data/data.obj.pathway.RData')) 
+
+func.type <- 'pathway'
+
+tb <- cbind(table(data.obj$meta.dat$icd10_first_3_name_short, data.obj$meta.dat$early_onset))
+idx <- names(which(rowSums(tb >15) ==2))
+idx <- idx[idx!='healthy']
+for(j in idx){
+  setwd(paste0(rd,'EarlyOnset_func'))
+  load('../CancerOnly_func/pathway/data.obj.wk.RData')
+
+  if(!dir.exists(j)){dir.create(j)}
+  setwd(j)
+  getwd()
+  
+  ind2 <- data.obj$meta.dat$icd10_first_3_name_short == j
+  ind2 <- rownames(data.obj$meta.dat[ind2,])
+  data.obj <- subset_data(data.obj, ind2)
+  dist.obj <- subset_dist(dist.obj, ind2)
+  
+  save(data.obj, dist.obj, file = 'data.obj.wk.RData')
+  getwd()
+  setwd('..')
+  
+}
+
+
+variable <- 'early_onset'
+for(dir in paste0('EarlyOnset_func/',idx)){
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(func_script))
 }
 
 
 
 
+############################## Pan-Cancer func #######################################
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
 
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+# if(!dir.exists(rd)) dir.create(rd)
+# setwd(wd)
+# source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+# try(load_package())
+# load(file = 'Data/data.obj.raw.core.RData') 
+
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+func.type <- 'pathway'
+setwd(wd)
+load(file = paste0('Data/data.obj.',func.type,'.RData')) 
+
+
+setwd(rd)
+dir <- 'PanCancer_func'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
+
+data.obj$meta.dat$Cancer_class <- as.character(data.obj$meta.dat$Cancer_class)
+data.obj$meta.dat$Cancer_class[data.obj$meta.dat$Group=='Control'] <- 'Control'
+
+data.obj$meta.dat$Group <- factor(data.obj$meta.dat$Group,levels=c('Control','Cancer'))
+
+save(data.obj, dist.obj, file = 'data.obj.wk.RData')
+
+variable <- "Group"; dir <- 'PanCancer_func'
+with(list(commandArgs = function(...) c("--args", variable, dir)), source(func_script))

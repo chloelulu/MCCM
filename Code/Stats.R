@@ -8221,7 +8221,7 @@ perform_differential_analysis_zicoseq <- function (data.obj, grp.name, adj.name=
                                            prev.filter = 0.1, max.abund.filter = 0.002,
                                            is.winsor = TRUE, outlier.pct = 0.03,
                                            is.post.sample = FALSE, perm.no = 999,
-                                           link.func = list(function (x) x^0.5),
+                                           link.func = list(function (x) x^0.0625, function (x) x^0.125, function (x) x^0.25, function (x) x^0.5),
                                            mt.method = c('fdr', 'raw'), cutoff = 0.10, 
                                            ann = '', width = 8, height = 7, seed = 123, ...) {
   mt.method <- match.arg(mt.method)
@@ -8289,11 +8289,11 @@ perform_differential_analysis_zicoseq <- function (data.obj, grp.name, adj.name=
     cat('ZicoSeq finished!\n')
     if (mt.method == 'fdr') pvalue.type <- 'p.adj.fdr'
     if (mt.method == 'raw') pvalue.type <- 'p.raw'
-    plot.obj <- ZicoSeq.plot2(ZicoSeq.obj = perm.obj, grp.name = grp.name, meta.dat = meta.dat, pvalue.type = pvalue.type, cutoff = cutoff)
-    cat('Plot is able to be generated!\n')
-    pdf(paste0("Taxa_ZicoSeq_", LOI, "_", ann, ".volcano.pdf"), width = width, height = height)
-    print(plot.obj)
-    dev.off()
+    # plot.obj <- ZicoSeq.plot2(ZicoSeq.obj = perm.obj, grp.name = grp.name, meta.dat = meta.dat, pvalue.type = pvalue.type, cutoff = cutoff)
+    # cat('Plot is able to be generated!\n')
+    # pdf(paste0("Taxa_ZicoSeq_", LOI, "_", ann, ".volcano.pdf"), width = width, height = height)
+    # print(plot.obj)
+    # dev.off()
     prop <- perm.obj$feature.dat
     prop <- t(t(prop) / colSums(prop))
     
@@ -8359,13 +8359,15 @@ perform_differential_analysis_zicoseq <- function (data.obj, grp.name, adj.name=
     nzm.list[[LOI]] <- nzm.vec
     prv.list[[LOI]] <- prv.vec
     
-    R2.list[[LOI]] <- perm.obj$R2[, 1, drop = FALSE]
+    R2.list[[LOI]] <- cbind(Func1 = apply(perm.obj$R2, 1, function(x) x[which.max(x)]))#perm.obj$R2[, 1, drop = FALSE]
     coef.list[[LOI]] <- t(perm.obj$coef.list[[1]][-1, , drop = FALSE])
     
     
     coef.mat <- t(perm.obj$coef.list[[1]][-1, , drop = FALSE])
     colnames(coef.mat) <- paste0('coef_', colnames(coef.mat))
-    res <- cbind(pv.vec, qv.vec,  R2=perm.obj$R2[, 1], coef.mat, 
+    res <- cbind(pv.vec, qv.vec,  
+                 R2=cbind(Func1 = apply(perm.obj$R2, 1, function(x) x[which.max(x)])), 
+                 coef.mat, 
                  m.vec, nzm.vec, fc.vec, prv.vec, pc.vec)
     rownames(res) <- rownames(prop)
     
@@ -8395,7 +8397,8 @@ perform_differential_analysis_zicoseq2 <- function (data.obj, grp.name, adj.name
                                                    prev.filter = 0.1, max.abund.filter = 0.002,
                                                    is.winsor = TRUE, outlier.pct = 0.03,
                                                    is.post.sample = FALSE, perm.no = 999,
-                                                   link.func = list(function (x) sign(x) * (abs(x))^0.5),
+                                                   # link.func = list(function (x) sign(x) * (abs(x))^0.5),
+                                                   link.func = list(function (x) sign(x) * (abs(x)^0.0625), function (x) sign(x) * (abs(x)^0.125), function (x) sign(x) * (abs(x)^0.25), function (x) sign(x) * (abs(x)^0.5)),
                                                    mt.method = c('fdr', 'raw'), cutoff = 0.10, 
                                                    ann = '', width = 8, height = 7, seed = 123, ...) {
   mt.method <- match.arg(mt.method)
@@ -8521,14 +8524,15 @@ perform_differential_analysis_zicoseq2 <- function (data.obj, grp.name, adj.name
     nzm.list[[LOI]] <- nzm.vec
     prv.list[[LOI]] <- prv.vec
     
-    R2.list[[LOI]] <- perm.obj$R2[, 1, drop = FALSE]
+    R2.list[[LOI]] <- cbind(Func1 = apply(perm.obj$R2, 1, function(x) x[which.max(x)]))#perm.obj$R2[, 1, drop = FALSE]
     coef.list[[LOI]] <- t(perm.obj$coef.list[[1]][-1, , drop = FALSE])
     
     
     coef.mat <- t(perm.obj$coef.list[[1]][-1, , drop = FALSE])
     colnames(coef.mat) <- paste0('coef_', colnames(coef.mat))
-    res <- cbind(pv.vec, qv.vec,  R2=perm.obj$R2[, 1], coef.mat, 
-                 m.vec, nzm.vec, fc.vec, prv.vec, pc.vec)
+    res <- cbind(pv.vec, qv.vec,  
+                 R2=cbind(Func1 = apply(perm.obj$R2, 1, function(x) x[which.max(x)])),#perm.obj$R2[, 1], 
+                 coef.mat, m.vec, nzm.vec, fc.vec, prv.vec, pc.vec)
     rownames(res) <- rownames(prop)
     
     write.csv(res, paste0("Taxa_ZicoSeq_", LOI, "_", ann, ".csv"))

@@ -1,22 +1,3 @@
-# variables <- c("Batch","Bristol_score","BMI", "Age", "Sex",
-#                "GI_nonGI","Cancer_class","Metastasis","Abx_day_365","PPI_day_365",
-#                "Charlson_score","Elix_score","Sample_season","Urban")
-# main.dirs <- 'CancerOnly' 
-# dirs <-  variables
-# figure.dir <- 'CancerOnly'
-# 
-# setwd(rd)
-# variables <- unique(gsub('/.*','',list.dirs(full.names = F)))
-# variables <- variables[grep('^Ex-',variables)]
-# main.dirs <-  variables
-# dirs <- 'Cancer_class'
-# figure.dir <- 'CancerX_Cancers'
-# 
-# ## parameter for DAA Heatmap
-# taxa.level <- 'Species'#'Genus'#'Phylum'
-# q.cut <- 0.05; p.cut <- 0.05; abund.cut <- 0.01; prev.cut <- 0.2
-# q.cut1 <- 0.001; q.cut2 <- 0.01; q.cut3 <- 0.05
-
 
 summary_plot <- function(
   main.dirs,
@@ -49,15 +30,15 @@ summary_plot <- function(
   
   heatmap.width,
   heatmap.height,
-  fd = "/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/Figure/",
-  wd = '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/',
-  rd = '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/Result/'
+  fd = "/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/mforge_clean/Figure/",
+  wd = '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/mforge_clean/',
+  rd = '/research/bsi/projects/staff_analysis/m216453/2023_01_09_Oncobiome/mforge_clean/Result/'
 ){
   
   if(length(main.dirs)>1){len <- (main.dirs)}else{len <- dirs}
   
   setwd(fd)
-  if(dir.exists(figure.dir)){dir.create(figure.dir)}
+  if(!dir.exists(figure.dir)){dir.create(figure.dir)}
   
   if(grepl('\\_func', rd)){alpha.summary=F; alpha.plot =F} # functional data does not have alpha diversity result, in case disable here
   
@@ -172,6 +153,7 @@ summary_plot <- function(
       for(dir in dirs){
         setwd(rd)
         setwd(main.dir)
+        getwd()
         setwd('Beta')
         cat('[',main.dir, '-',dir,']\n')
         setwd(dir)
@@ -200,21 +182,21 @@ summary_plot <- function(
     dist.names <- rownames(R2.unadj)
     # plot.list <- list()
     # for(dist.name in dist.names){
-    #   R2.adj.sub <- as.data.frame(R2.adj[dist.name,]) %>% 
+    #   R2.adj.sub <- as.data.frame(R2.adj[dist.name,]) %>%
     #     tibble::rownames_to_column(dist.name)
     #   colnames(R2.adj.sub)[2] <- 'value'
     #   R2.m <- melt(R2.adj.sub)
     #   R2.m$value <- R2.m$value * 100
     #   R2.m <- R2.m[order(R2.m$value),]
-    #   plot.list[[dist.name]] <- ggplot(R2.m, aes(x = variable,y= (value), 
-    #                                              fill = reorder(!!as.name(dist.name), value))) + 
-    #     geom_bar(position="stack", stat="identity") + 
-    #     scale_fill_manual(values = c(brewer.pal(8, 'Pastel1'),brewer.pal(8, 'Pastel2')))+ 
-    #     theme_classic() + 
-    #     labs(x = 'Taxa', y = 'Beta-diversity variance explained (R2),%', fill = '') + 
-    #     theme(panel.grid = element_blank(), 
+    #   plot.list[[dist.name]] <- ggplot(R2.m, aes(x = variable,y= (value),
+    #                                              fill = reorder(!!as.name(dist.name), value))) +
+    #     geom_bar(position="stack", stat="identity") +
+    #     scale_fill_manual(values = c(brewer.pal(8, 'Pastel1'),brewer.pal(8, 'Pastel2')))+
+    #     theme_classic() +
+    #     labs(x = 'Taxa', y = 'Beta-diversity variance explained (R2),%', fill = '') +
+    #     theme(panel.grid = element_blank(),
     #           legend.position = 'right',
-    #           axis.text.x = element_blank()) + 
+    #           axis.text.x = element_blank()) +
     #     ggtitle(dist.name)
     # }
     # ggarrange(plot.list[[1]], plot.list[[2]],plot.list[[3]], plot.list[[4]],
@@ -227,21 +209,21 @@ summary_plot <- function(
     # 
     # plot.list <- list()
     # for(dist.name in dist.names){
-    #   R2.adj.sub <- as.data.frame(R2.unadj[dist.name,]) %>% 
+    #   R2.adj.sub <- as.data.frame(R2.unadj[dist.name,]) %>%
     #     tibble::rownames_to_column(dist.name)
     #   colnames(R2.adj.sub)[2] <- 'value'
     #   R2.m <- melt(R2.adj.sub)
     #   R2.m$value <- R2.m$value * 100
     #   R2.m <- R2.m[order(R2.m$value),]
-    #   plot.list[[dist.name]] <- ggplot(R2.m, aes(x = variable,y= (value), 
-    #                                              fill = reorder(!!as.name(dist.name), value))) + 
-    #     geom_bar(position="stack", stat="identity") + 
-    #     scale_fill_manual(values = c(brewer.pal(8, 'Pastel1'),brewer.pal(8, 'Pastel2')))+ 
-    #     theme_classic() + 
-    #     labs(x = 'Taxa', y = 'Beta-diversity variance explained (R2),%', fill = '') + 
-    #     theme(panel.grid = element_blank(), 
+    #   plot.list[[dist.name]] <- ggplot(R2.m, aes(x = variable,y= (value),
+    #                                              fill = reorder(!!as.name(dist.name), value))) +
+    #     geom_bar(position="stack", stat="identity") +
+    #     scale_fill_manual(values = c(brewer.pal(8, 'Pastel1'),brewer.pal(8, 'Pastel2')))+
+    #     theme_classic() +
+    #     labs(x = 'Taxa', y = 'Beta-diversity variance explained (R2),%', fill = '') +
+    #     theme(panel.grid = element_blank(),
     #           legend.position = 'right',
-    #           axis.text.x = element_blank()) + 
+    #           axis.text.x = element_blank()) +
     #     ggtitle(dist.name)
     # }
     # ggarrange(plot.list[[1]], plot.list[[2]],plot.list[[3]], plot.list[[4]],
@@ -249,7 +231,7 @@ summary_plot <- function(
     # setwd(fd)
     # setwd(figure.dir)
     # ggsave(file = 'BetaR2_AllStack_unAdj.pdf', width = 5,height = 7)
-    # 
+
     
     setwd(fd)
     setwd(figure.dir)
@@ -812,26 +794,6 @@ generate_tree <- function(data.obj, dir, Q.All, R2.All, taxa.level,
     cat('No sig taxa\n')
   }
 
-  # p <- ggplot(tree.sub, aes(x, y)) + 
-  #   geom_tree() + 
-  #   theme_tree() +
-  #   # lims(x=c(0,4)) + 
-  #   geom_tiplab(align=T,aes(color =taxa.split))+
-  #   scale_color_manual(values = c(brewer.pal(8,'Set1')[-c(5:7)],brewer.pal(8,'Set2')[-c(2,6)],brewer.pal(12,'Paired')))+
-  #   scale_fill_manual(values = cols.fill) +
-  #   theme(legend.position="right") + 
-  #   labs(color = 'Family', shape = 'direction') + 
-  #   ggtitle(paste0(dir,'(FDR<0.05&minp>0.01&prev>0.05)'))
-  # p
-  # R2.sub <- R2.sig[tree.sub$tip.label,dir, drop =F]
-  # colnames(R2.sub) <- 'R2 x coefficents'
-  # 
-  # gheatmap(p, R2.sub, offset=2, width=0.1, font.size=3, colnames = F) +
-  #   scale_fill_gradient2(low = brewer.pal(9, 'Blues')[8],
-  #                        mid = "white",
-  #                        high = brewer.pal(9, 'YlOrRd')[4],
-  #                        midpoint = 0)+
-  #   labs(fill ='R2x coefficient')
   return(list(plot=p, sig.taxa= sig.taxa))
 }
 
