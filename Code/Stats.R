@@ -8400,7 +8400,7 @@ perform_differential_analysis_zicoseq2 <- function (data.obj, grp.name, adj.name
                                                    # link.func = list(function (x) sign(x) * (abs(x))^0.5),
                                                    link.func = list(function (x) sign(x) * (abs(x)^0.0625), function (x) sign(x) * (abs(x)^0.125), function (x) sign(x) * (abs(x)^0.25), function (x) sign(x) * (abs(x)^0.5)),
                                                    mt.method = c('fdr', 'raw'), cutoff = 0.10, 
-                                                   ann = '', width = 8, height = 7, seed = 123, ...) {
+                                                   ann = '', plot =T, width = 8, height = 7, seed = 123, ...) {
   mt.method <- match.arg(mt.method)
   set.seed(seed)
   
@@ -8440,7 +8440,6 @@ perform_differential_analysis_zicoseq2 <- function (data.obj, grp.name, adj.name
   for (LOI in taxa.levels) {
     cat(LOI, "\n")
     feature.dat <- as.matrix(data.obj$abund.list[[LOI]])
-    
     perm.obj <- ZicoSeq2(meta.dat = meta.dat, feature.dat = feature.dat, feature.dat.type = feature.dat.type,
                         is.winsor = is.winsor, outlier.pct = outlier.pct, 
                         prev.filter = prev.filter, max.abund.filter = max.abund.filter,
@@ -8452,12 +8451,15 @@ perform_differential_analysis_zicoseq2 <- function (data.obj, grp.name, adj.name
     if (mt.method == 'fdr') pvalue.type <- 'p.adj.fdr'
     if (mt.method == 'raw') pvalue.type <- 'p.raw'
     perm.obj$call$feature.dat.type = feature.dat.type
-    plot.obj <- ZicoSeq.plot2(ZicoSeq.obj = perm.obj, grp.name = grp.name, meta.dat = meta.dat, pvalue.type = pvalue.type, cutoff = cutoff)
-    cat('Generate ZicoSeq plot!\n')
-    pdf(paste0("Taxa_ZicoSeq_", LOI, "_", ann, ".volcano.pdf"), width = width, height = height)
-    print(plot.obj)
-    dev.off()
-    cat('ZicoSeq plot finished!\n')
+    if(plot==T){
+      plot.obj <- ZicoSeq.plot2(ZicoSeq.obj = perm.obj, grp.name = grp.name, meta.dat = meta.dat, pvalue.type = pvalue.type, cutoff = cutoff)
+      cat('Generate ZicoSeq plot!\n')
+      pdf(paste0("Taxa_ZicoSeq_", LOI, "_", ann, ".volcano.pdf"), width = width, height = height)
+      print(plot.obj)
+      dev.off()
+      cat('ZicoSeq plot finished!\n')
+      
+    }
     
     prop <- perm.obj$feature.dat
     prop <- t(t(prop) / colSums(prop))

@@ -88,6 +88,22 @@ Q_sign_df_comorbidities <- do.call(cbind, elix_variables_diff_list_Q)
 dim(R2_sign_df_comorbidities); dim(Q_sign_df_comorbidities)
 
 
+#--------------------------------------
+#inspect
+
+Q_sign_df_comorbidities[grep("PWY-7754", rownames(Q_sign_df_comorbidities)),] < 0.1
+#Elixhauser_DMcx  Elixhauser_FluidsLytes
+
+R2_sign_df_comorbidities[grep("PWY-7754", rownames(Q_sign_df_comorbidities)),][c("Elixhauser_DMcx",  "Elixhauser_FluidsLytes")]
+#Elixhauser_DMcx Elixhauser_FluidsLytes
+#0.003874497            0.005763934 
+
+#these are pretty large positive effect sizes. 
+#Question is whether these are also specific to cancer classes
+hist(R2_sign_df_comorbidities); abline(v=c(0.003874497, 0.005763934))
+
+
+
 #-------------------------------------------------------------------------------
 #find strongest species linked to weightloss
 sig_names <- names(which(Q_sign_df_comorbidities[,"Elixhauser_WeightLoss"] < cutoff))
@@ -138,6 +154,17 @@ for (i in 1:length(canX_Ex_list)) {
 
 #made sure the names match and are in the same order
 canX_Ctr_list <- canX_Ctr_list[order(names(canX_Ctr_list))]
+
+
+#---------------------------------------
+
+#Checked in Supplementary Table 2. 
+#PWY-7754: bile acid 7&alpha;-dehydroxylation 
+
+#positively associated to all cancer compared to healthy controls
+#not in the healthy vs. cancer class comparisons; probably filtered out because of prevalence?
+#The pathway is not specific to any cancer compared to other cancers
+
 
 
 #-------------------------------------------------------------------------------

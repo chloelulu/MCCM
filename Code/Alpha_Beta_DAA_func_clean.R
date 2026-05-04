@@ -72,6 +72,10 @@ if(length(grep('subCancerX\\-Ex\\_func',dir))==1|length(grep('subCancerX\\-Ex2\\
   }
 }
 
+if(dir=='LungCancer_Smoking_func'){
+  adj.name <- covars[!(covars %in% c(variable,'GI_nonGI',"Charlson_score","Abx_last_month","PPI_last_month","Cancer_class","Age"))]
+}
+
 cat("[INFO] Adjustment covariates:\n"); print(adj.name)
   
 

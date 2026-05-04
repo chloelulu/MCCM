@@ -217,6 +217,87 @@ save(data.obj, dist.obj, file = 'Data/data.obj.pathway.RData')
 
 
 
+
+
+############################## Add Smoking,vital_status,OS_months,prior_chemotherapy (02/18/2026) #######################################
+setwd('/Users/luyang1//myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/')
+load(file = 'Data/data.obj.raw.core.RData') # Now the old data is in Data/backup_02182026/ folder
+Supplementary_Table_1 <- read_excel("Code/Submission/Supplementary tables/Supplementary Table 1.xlsx", sheet = "TableS1-2")
+Supplementary_Table_1$SampleID[!(Supplementary_Table_1$SampleID %in% rownames(data.obj$meta.dat))]
+rownames(data.obj$meta.dat)[!(rownames(data.obj$meta.dat) %in% Supplementary_Table_1$SampleID)]
+data.obj$meta.dat <- data.obj$meta.dat %>% rownames_to_column('SampleID') %>% inner_join(Supplementary_Table_1[,c("SampleID","vital_status","OS_months","smoking_category","prior_chemotherapy")])
+data.obj.rff$meta.dat <- data.obj.rff$meta.dat %>% rownames_to_column('SampleID') %>% inner_join(Supplementary_Table_1[,c("SampleID","vital_status","OS_months","smoking_category","prior_chemotherapy")])
+data.obj$meta.dat <- data.obj$meta.dat %>% column_to_rownames('SampleID')
+data.obj.rff$meta.dat <- data.obj.rff$meta.dat %>% column_to_rownames('SampleID')
+save(data.obj,dist.obj, data.obj.rff, dist.obj.rff, file = 'Data/data.obj.raw.core.RData')
+
+
+load(file = 'Data/data.obj.pathway.RData') # Now the old data is in Data/backup_02182026/ folder
+Supplementary_Table_1 <- read_excel("Code/Submission/Supplementary tables/Supplementary Table 1.xlsx", sheet = "TableS1-2")
+Supplementary_Table_1$SampleID[!(Supplementary_Table_1$SampleID %in% rownames(data.obj$meta.dat))]
+rownames(data.obj$meta.dat)[!(rownames(data.obj$meta.dat) %in% Supplementary_Table_1$SampleID)]
+data.obj$meta.dat <- data.obj$meta.dat %>% rownames_to_column('SampleID') %>% inner_join(Supplementary_Table_1[,c("SampleID","vital_status","OS_months","smoking_category","prior_chemotherapy")])
+data.obj$meta.dat <- data.obj$meta.dat %>% column_to_rownames('SampleID')
+save(data.obj,dist.obj, file = 'Data/data.obj.pathway.RData')
+
+
+############################## Add Ruben's treatment and NAs (04/14/2026) #######################################
+setwd('/Users/luyang1//myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/')
+load(file = 'Data/backup_04142026/data.obj.raw.core.RData') 
+Supplementary_Table_1 <- read_excel("Code/Submission/Supplementary tables/old/Supplementary Table 1_RM.xlsx", sheet = "TableS1-2")
+Supplementary_Table_1$SampleID[!(Supplementary_Table_1$SampleID %in% rownames(data.obj$meta.dat))]
+rownames(data.obj$meta.dat)[!(rownames(data.obj$meta.dat) %in% Supplementary_Table_1$SampleID)]
+apply(Supplementary_Table_1, 2, function(x) sum(x=='NA'))
+which(apply(Supplementary_Table_1, 2, function(x) sum(is.na(x)))>0)
+apply(data.obj$meta.dat, 2, function(x) sum(is.na(x)))
+apply(data.obj$meta.dat, 2, function(x) sum(x=='NA'))
+which(apply(data.obj$meta.dat, 2, function(x) sum(is.na(x)))>0)
+TableS16 <- read_excel("Code/Submission/Supplementary tables/old/Supplementary Table 1_RM.xlsx", sheet = "TableS1-6")
+TableS16$sample[!(TableS16$sample %in% Supplementary_Table_1$SequencingName)]
+TableS16 <- TableS16[,c(1:2)]
+Supplementary_Table_1 <- inner_join(TableS16,Supplementary_Table_1) 
+data.obj$meta.dat <- data.obj$meta.dat %>% rownames_to_column('SampleID') %>% 
+  inner_join(Supplementary_Table_1[,c("SampleID","sample","planned_Tx_class","planned_Tx_category","planned_Tx","planned_Radiation")])
+data.obj.rff$meta.dat <- data.obj.rff$meta.dat %>% rownames_to_column('SampleID') %>% 
+  inner_join(Supplementary_Table_1[,c("SampleID","sample","planned_Tx_class","planned_Tx_category","planned_Tx","planned_Radiation")])
+data.obj$meta.dat[data.obj$meta.dat == "NA"] <- NA
+data.obj.rff$meta.dat[data.obj.rff$meta.dat == "NA"] <- NA
+data.obj$meta.dat <- data.obj$meta.dat %>% column_to_rownames('SampleID')
+data.obj.rff$meta.dat <- data.obj.rff$meta.dat %>% column_to_rownames('SampleID')
+save(data.obj,dist.obj, data.obj.rff, dist.obj.rff, file = 'Data/data.obj.raw.core.RData')
+
+
+load(file = 'Data/backup_04142026/data.obj.pathway.RData') # Now the old data is in Data/backup_02182026/ folder
+Supplementary_Table_1 <- read_excel("Code/Submission/Supplementary tables/old/Supplementary Table 1_RM.xlsx", sheet = "TableS1-2")
+Supplementary_Table_1$SampleID[!(Supplementary_Table_1$SampleID %in% rownames(data.obj$meta.dat))]
+rownames(data.obj$meta.dat)[!(rownames(data.obj$meta.dat) %in% Supplementary_Table_1$SampleID)]
+TableS16 <- read_excel("Code/Submission/Supplementary tables/old/Supplementary Table 1_RM.xlsx", sheet = "TableS1-6")
+TableS16$sample[!(TableS16$sample %in% Supplementary_Table_1$SequencingName)]
+TableS16 <- TableS16[,c(1:2)]
+Supplementary_Table_1 <- inner_join(TableS16,Supplementary_Table_1) 
+data.obj$meta.dat <- data.obj$meta.dat %>% rownames_to_column('SampleID') %>% 
+  inner_join(Supplementary_Table_1[,c("SampleID","sample","planned_Tx_class","planned_Tx_category","planned_Tx","planned_Radiation")])
+data.obj$meta.dat[data.obj$meta.dat == "NA"] <- NA
+data.obj$meta.dat <- data.obj$meta.dat %>% column_to_rownames('SampleID')
+save(data.obj,dist.obj, file = 'Data/data.obj.pathway.RData')
+
+
+load(file = 'Data/backup_04142026/data.obj.mph.RData') # Now the old data is in Data/backup_02182026/ folder
+Supplementary_Table_1 <- read_excel("Code/Submission/Supplementary tables/old/Supplementary Table 1_RM.xlsx", sheet = "TableS1-2")
+Supplementary_Table_1$SampleID[!(Supplementary_Table_1$SampleID %in% rownames(data.obj$meta.dat))]
+rownames(data.obj$meta.dat)[!(rownames(data.obj$meta.dat) %in% Supplementary_Table_1$SampleID)]
+TableS16 <- read_excel("Code/Submission/Supplementary tables/old/Supplementary Table 1_RM.xlsx", sheet = "TableS1-6")
+TableS16$sample[!(TableS16$sample %in% Supplementary_Table_1$SequencingName)]
+TableS16 <- TableS16[,c(1:2)]
+Supplementary_Table_1 <- inner_join(TableS16,Supplementary_Table_1) 
+data.obj$meta.dat <- data.obj$meta.dat %>% rownames_to_column('SampleID') %>% 
+  inner_join(Supplementary_Table_1[,c("SampleID","sample","planned_Tx_class","planned_Tx_category","planned_Tx","planned_Radiation")])
+data.obj$meta.dat[data.obj$meta.dat == "NA"] <- NA
+data.obj$meta.dat <- data.obj$meta.dat %>% column_to_rownames('SampleID')
+save(data.obj,dist.obj, file = 'Data/data.obj.mph.RData')
+
+
+
 ############################# Define script ######################################
 file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
 file_dir <- dirname(dirname(dirname(dirname(file_dir))))
@@ -256,7 +337,8 @@ save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
 
 
 covars <- c("Batch","Bristol_score","BMI", "Age", "Sex", "GI_nonGI","Cancer_class","Metastasis","PPI_day_365", "Abx_day_365", 
-            "PPI_last_month","Abx_last_month","Charlson_score","Elix_score","Sample_season","Urban" ,"icd10_first_3_name_short", "Site")
+            "PPI_last_month","Abx_last_month","Charlson_score","Elix_score","Sample_season","Urban" ,"icd10_first_3_name_short", "Site",
+            "smoking_category","prior_chemotherapy")
 blood.names <- c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count',
                  'Neutrophils_cat','Platelet.Count_cat','Hemoglobin_cat',
                  "neut_neutropenia2","bone_marrow_suppression2","Hb_anemia2","Pl_thrombocytopenia2","neut_neutropenia_c","Hb_anemia_c","Pl_thrombocytopenia_c")
@@ -282,6 +364,52 @@ for(variable in variables){
 # }
 # 
 # variables <- xx
+############################## Cancer Only (smoking for lung cancer) #######################################
+
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+
+getwd()
+load(file = 'Data/data.obj.raw.core.RData') 
+
+
+setwd(rd)
+dir <- 'LungCancer_Smoking'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
+
+ind <- data.obj$meta.dat$icd10_first_3_name_short == 'bronchus lung'
+data.obj <- subset_data(data.obj, ind)
+dist.obj <- subset_dist(dist.obj, ind)
+
+ind <- data.obj.rff$meta.dat$icd10_first_3_name_short == 'bronchus lung'
+data.obj.rff <- subset_data(data.obj.rff, ind)
+dist.obj.rff <- subset_dist(dist.obj.rff, ind)
+
+data.obj$meta.dat$smoking_category2 <- data.obj$meta.dat$smoking_category
+data.obj$meta.dat$smoking_category2[data.obj$meta.dat$smoking_category2 %in% c("Current","Former")] <- "Yes"
+
+data.obj.rff$meta.dat$smoking_category2 <- data.obj.rff$meta.dat$smoking_category
+data.obj.rff$meta.dat$smoking_category2[data.obj.rff$meta.dat$smoking_category2 %in% c("Current","Former")] <- "Yes"
+
+save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
+
+variables <- c("smoking_category","smoking_category2")
+dir <- 'LungCancer_Smoking'
+for(variable in variables){
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
+}
+
+
+
 ############################## Control vs sub Cancer X #######################################
 file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
 file_dir <- dirname(dirname(dirname(dirname(file_dir))))
@@ -529,6 +657,787 @@ for(dir in paste0('EarlyOnset/',idx)){
 
 
 
+### ===== ECI subset analysis: pancancer ======
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+if(!dir.exists(rd)) dir.create(rd)
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+
+load(file = 'Data/data.obj.raw.core.RData') 
+
+setwd(rd)
+dir <- 'ECI_subset'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
+
+data.obj$meta.dat$ECI2 <- case_when(
+  data.obj$meta.dat$Elix_score <=1  ~ "LowCancer",
+  data.obj$meta.dat$Elix_score %in% c(2,3) ~ "MediumCancer",
+  data.obj$meta.dat$Elix_score >= 4 ~ "HighCancer"
+)
+data.obj$meta.dat$ECI2[data.obj$meta.dat$Group=='Control'& data.obj$meta.dat$Elix_score<4] <- 'Control'
+data.obj$meta.dat$ECI2[data.obj$meta.dat$Group=='Control' & data.obj$meta.dat$Elix_score>=4] <- NA
+
+data.obj.rff$meta.dat$ECI2 <- case_when(
+  data.obj.rff$meta.dat$Elix_score <=1 ~ "LowCancer",
+  data.obj.rff$meta.dat$Elix_score %in% c(2,3) ~ "MediumCancer",
+  data.obj.rff$meta.dat$Elix_score >= 4 ~ "HighCancer"
+)
+data.obj.rff$meta.dat$ECI2[data.obj.rff$meta.dat$Group=='Control' & data.obj.rff$meta.dat$Elix_score<4] <- 'Control'
+data.obj.rff$meta.dat$ECI2[data.obj.rff$meta.dat$Group=='Control' & data.obj.rff$meta.dat$Elix_score>=4] <- NA
+
+data.obj2 <- data.obj
+data.obj.rff2 <- data.obj.rff
+dist.obj2 <- dist.obj
+dist.obj.rff2 <- dist.obj.rff
+
+for(i in c('LowCancer','HighCancer')){
+  setwd(rd)
+  dir <- 'ECI_subset'
+  setwd(dir)
+  dir <- paste0('Control-',i)
+  if(!dir.exists(dir)){dir.create(dir)}
+  setwd(dir)
+  getwd()
+  
+  ind <- data.obj2$meta.dat$ECI2 %in% c('Control',i)
+  data.obj <- subset_data(data.obj2, ind)
+  dist.obj <- subset_dist(dist.obj2, ind)
+  cat(sum(ind),'\n')
+  
+  ind <- data.obj.rff2$meta.dat$ECI2 %in% c('Control',i)
+  data.obj.rff <- subset_data(data.obj.rff2, ind)
+  dist.obj.rff <- subset_dist(dist.obj.rff2, ind)
+  cat(sum(ind),'\n')
+  
+  data.obj$meta.dat$ECI2 <- factor(data.obj$meta.dat$ECI2,levels=c('Control',i))
+  data.obj.rff$meta.dat$ECI2 <- factor(data.obj.rff$meta.dat$ECI2,levels=c('Control',i))
+  
+  save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
+}
+
+
+variable <- "ECI2"; dir <- 'ECI_subset'
+for(dir in paste0('ECI_subset/Control-',c('LowCancer','HighCancer'))){
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
+}
+
+
+### ===== ECI extreme case subset analysis: pancancer (Cancer-lowECI:01; Cancer-highECI:>=4; HV: ECI<=4; including cancers with n>15)  ======
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+if(!dir.exists(rd)) dir.create(rd)
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+
+load(file = 'Data/data.obj.raw.core.RData') 
+
+setwd(rd)
+dir <- 'ECI_subset4'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
+
+data.obj$meta.dat$ECI22 <- case_when(
+  data.obj$meta.dat$Elix_score <= 1 ~ "LowCancer",
+  data.obj$meta.dat$Elix_score %in% c(1,2,3) ~ "MediumCancer",
+  data.obj$meta.dat$Elix_score >= 4 ~ "HighCancer"
+)
+data.obj$meta.dat$ECI22[data.obj$meta.dat$Group=='Control'& data.obj$meta.dat$Elix_score<4] <- 'Control'
+data.obj$meta.dat$ECI22[data.obj$meta.dat$Group=='Control' & data.obj$meta.dat$Elix_score>=4] <- NA
+
+data.obj.rff$meta.dat$ECI22 <- case_when(
+  data.obj.rff$meta.dat$Elix_score <= 1 ~ "LowCancer",
+  data.obj.rff$meta.dat$Elix_score %in% c(1,2,3) ~ "MediumCancer",
+  data.obj.rff$meta.dat$Elix_score >= 4 ~ "HighCancer"
+)
+data.obj.rff$meta.dat$ECI22[data.obj.rff$meta.dat$Group=='Control' & data.obj.rff$meta.dat$Elix_score<4] <- 'Control'
+data.obj.rff$meta.dat$ECI22[data.obj.rff$meta.dat$Group=='Control' & data.obj.rff$meta.dat$Elix_score>=4] <- NA
+
+## subset cancer n>15
+cancer.type <- names(which(table(data.obj$meta.dat$icd10_first_3_name_short)>15))
+
+data.obj$meta.dat$icd10_first_3_name_short <- as.character(data.obj$meta.dat$icd10_first_3_name_short)
+samIDs <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name_short %in% cancer.type,])
+data.obj <- subset_data(data.obj, samIDs = samIDs)
+dist.obj <- subset_dist(dist.obj, samIDs = samIDs)
+
+data.obj.rff$meta.dat$icd10_first_3_name_short <- as.character(data.obj.rff$meta.dat$icd10_first_3_name_short)
+samIDs <- rownames(data.obj.rff$meta.dat[data.obj.rff$meta.dat$icd10_first_3_name_short %in% cancer.type,])
+data.obj.rff <- subset_data(data.obj.rff, samIDs = samIDs)
+dist.obj.rff <- subset_dist(dist.obj.rff, samIDs = samIDs)
+
+data.obj$meta.dat$icd10_first_3_name_short <- as.factor(data.obj$meta.dat$icd10_first_3_name_short)
+data.obj.rff$meta.dat$icd10_first_3_name_short <- as.factor(data.obj.rff$meta.dat$icd10_first_3_name_short)
+
+
+data.obj2 <- data.obj
+data.obj.rff2 <- data.obj.rff
+dist.obj2 <- dist.obj
+dist.obj.rff2 <- dist.obj.rff
+
+for(i in c('LowCancer','HighCancer')){
+  setwd(rd)
+  dir <- 'ECI_subset4'
+  setwd(dir)
+  dir <- paste0('Control-',i)
+  if(!dir.exists(dir)){dir.create(dir)}
+  setwd(dir)
+  getwd()
+  
+  ind <- data.obj2$meta.dat$ECI22 %in% c('Control',i)
+  data.obj <- subset_data(data.obj2, ind)
+  dist.obj <- subset_dist(dist.obj2, ind)
+  cat(sum(ind),'\n')
+  
+  ind <- data.obj.rff2$meta.dat$ECI22 %in% c('Control',i)
+  data.obj.rff <- subset_data(data.obj.rff2, ind)
+  dist.obj.rff <- subset_dist(dist.obj.rff2, ind)
+  cat(sum(ind),'\n')
+  
+  data.obj$meta.dat$ECI22 <- factor(data.obj$meta.dat$ECI22,levels=c('Control',i))
+  data.obj.rff$meta.dat$ECI22 <- factor(data.obj.rff$meta.dat$ECI22,levels=c('Control',i))
+  
+  save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
+}
+
+
+variable <- "ECI22"; dir <- 'ECI_subset4'
+for(dir in paste0('ECI_subset4/Control-',c('LowCancer','HighCancer'))){
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
+}
+
+
+
+
+
+
+
+### ===== ECI subset analysis: cancer X vs HV (lowCancer==0&1, also exclude healthy ECI>=4) ======
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+if(!dir.exists(rd)) dir.create(rd)
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+
+load(file = 'Data/data.obj.raw.core.RData') 
+
+setwd(rd)
+dir <- 'ECI_subset'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
+
+data.obj$meta.dat$ECI2 <- case_when(
+  data.obj$meta.dat$Elix_score <=1  ~ "LowCancer",
+  data.obj$meta.dat$Elix_score %in% c(2,3) ~ "MediumCancer",
+  data.obj$meta.dat$Elix_score >= 4 ~ "HighCancer"
+)
+data.obj$meta.dat$ECI2[data.obj$meta.dat$Group=='Control'& data.obj$meta.dat$Elix_score<4] <- 'Control'
+data.obj$meta.dat$ECI2[data.obj$meta.dat$Group=='Control' & data.obj$meta.dat$Elix_score>=4] <- NA
+
+data.obj.rff$meta.dat$ECI2 <- case_when(
+  data.obj.rff$meta.dat$Elix_score <=1 ~ "LowCancer",
+  data.obj.rff$meta.dat$Elix_score %in% c(2,3) ~ "MediumCancer",
+  data.obj.rff$meta.dat$Elix_score >= 4 ~ "HighCancer"
+)
+data.obj.rff$meta.dat$ECI2[data.obj.rff$meta.dat$Group=='Control' & data.obj.rff$meta.dat$Elix_score<4] <- 'Control'
+data.obj.rff$meta.dat$ECI2[data.obj.rff$meta.dat$Group=='Control' & data.obj.rff$meta.dat$Elix_score>=4] <- NA
+
+cancers <- names(which(sort(cbind(table(data.obj$meta.dat$icd10_first_3_name_short,data.obj$meta.dat$ECI2))[,"LowCancer"]) > 2))
+cancers2 <- names(which(table(data.obj$meta.dat$icd10_first_3_name_short)>15))
+cancers2 <- cancers2[cancers2!="healthy"]
+cancers <- intersect(cancers, cancers2)
+
+data.obj2 <- data.obj
+data.obj.rff2 <- data.obj.rff
+dist.obj2 <- dist.obj
+dist.obj.rff2 <- dist.obj.rff
+
+
+## Subset cancer 
+for(cancer in cancers){
+  setwd(rd)
+  dir <- 'ECI_subset'
+  setwd(dir)
+  cat('[',cancer,']\n')
+  dir <- cancer
+  if(!dir.exists(dir)){dir.create(dir)}
+  setwd(dir)
+  getwd()
+  
+  ind <- data.obj2$meta.dat$icd10_first_3_name_short %in% c('healthy',cancer)
+  data.obj3 <- subset_data(data.obj2, ind)
+  dist.obj3 <- subset_dist(dist.obj2, ind)
+  data.obj3$meta.dat$icd10_first_3_name_short <- droplevels(data.obj3$meta.dat$icd10_first_3_name_short)
+  cat(sum(ind),'\n')
+  
+  ind <- data.obj.rff2$meta.dat$icd10_first_3_name_short %in% c('healthy',cancer)
+  data.obj.rff3 <- subset_data(data.obj.rff2, ind)
+  dist.obj.rff3 <- subset_dist(dist.obj.rff2, ind)
+  data.obj.rff3$meta.dat$icd10_first_3_name_short <- droplevels(data.obj.rff3$meta.dat$icd10_first_3_name_short)
+  
+  cat(sum(ind),'\n')
+  
+  for(i in c('LowCancer','MediumCancer','HighCancer')){
+    setwd(rd)
+    dir <- 'ECI_subset'
+    setwd(dir)
+    cat('[',cancer,']\n')
+    dir <- cancer
+    if(!dir.exists(dir)){dir.create(dir)}
+    setwd(dir)
+    
+    dir <- paste0('Control-',i)
+    if(!dir.exists(dir)){dir.create(dir)}
+    setwd(dir)
+    getwd()
+    
+    ind <- data.obj3$meta.dat$ECI2 %in% c('Control',i)
+    data.obj <- subset_data(data.obj3, ind)
+    dist.obj <- subset_dist(dist.obj3, ind)
+    cat(sum(ind),'\n')
+    
+    ind <- data.obj.rff3$meta.dat$ECI2 %in% c('Control',i)
+    data.obj.rff <- subset_data(data.obj.rff3, ind)
+    dist.obj.rff <- subset_dist(dist.obj.rff3, ind)
+    cat(sum(ind),'\n')
+    
+    data.obj$meta.dat$ECI2 <- factor(data.obj$meta.dat$ECI2,levels=c('Control',i))
+    data.obj.rff$meta.dat$ECI2 <- factor(data.obj.rff$meta.dat$ECI2,levels=c('Control',i))
+    
+    save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
+}
+}
+
+variable <- "ECI2"; dir <- 'ECI_subset'
+for(cancer in cancers){
+  for(dir in paste0('ECI_subset/',cancer,'/Control-',c('LowCancer'))){
+    with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
+    }
+}
+
+
+
+
+### ===== ECI extreme case subset analysis: cancer X vs HV (lowCancer==0, also exclude healthy ECI>=4)======
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+if(!dir.exists(rd)) dir.create(rd)
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+
+load(file = 'Data/data.obj.raw.core.RData') 
+
+setwd(rd)
+dir <- 'ECI_subset0'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
+
+data.obj$meta.dat$ECI22 <- case_when(
+  data.obj$meta.dat$Elix_score ==0  ~ "LowCancer",
+  data.obj$meta.dat$Elix_score %in% c(1,2,3) ~ "MediumCancer",
+  data.obj$meta.dat$Elix_score >= 4 ~ "HighCancer"
+)
+data.obj$meta.dat$ECI22[data.obj$meta.dat$Group=='Control'& data.obj$meta.dat$Elix_score<4] <- 'Control'
+data.obj$meta.dat$ECI22[data.obj$meta.dat$Group=='Control' & data.obj$meta.dat$Elix_score>=4] <- NA
+
+data.obj.rff$meta.dat$ECI22 <- case_when(
+  data.obj.rff$meta.dat$Elix_score ==0 ~ "LowCancer",
+  data.obj.rff$meta.dat$Elix_score %in% c(2,3) ~ "MediumCancer",
+  data.obj.rff$meta.dat$Elix_score >= 4 ~ "HighCancer"
+)
+data.obj.rff$meta.dat$ECI22[data.obj.rff$meta.dat$Group=='Control' & data.obj.rff$meta.dat$Elix_score<4] <- 'Control'
+data.obj.rff$meta.dat$ECI22[data.obj.rff$meta.dat$Group=='Control' & data.obj.rff$meta.dat$Elix_score>=4] <- NA
+
+cancers <- names(which(sort(cbind(table(data.obj$meta.dat$icd10_first_3_name_short,data.obj$meta.dat$ECI22))[,"LowCancer"]) > 2))
+cancers2 <- names(which(table(data.obj$meta.dat$icd10_first_3_name_short)>15))
+cancers2 <- cancers2[cancers2!="healthy"]
+cancers <- intersect(cancers, cancers2)
+
+data.obj2 <- data.obj
+data.obj.rff2 <- data.obj.rff
+dist.obj2 <- dist.obj
+dist.obj.rff2 <- dist.obj.rff
+
+
+## Subset cancer 
+for(cancer in cancers){
+  setwd(rd)
+  dir <- 'ECI_subset0'
+  setwd(dir)
+  cat('[',cancer,']\n')
+  dir <- cancer
+  if(!dir.exists(dir)){dir.create(dir)}
+  setwd(dir)
+  getwd()
+  
+  ind <- data.obj2$meta.dat$icd10_first_3_name_short %in% c('healthy',cancer)
+  data.obj3 <- subset_data(data.obj2, ind)
+  dist.obj3 <- subset_dist(dist.obj2, ind)
+  data.obj3$meta.dat$icd10_first_3_name_short <- droplevels(data.obj3$meta.dat$icd10_first_3_name_short)
+  cat(sum(ind),'\n')
+  
+  ind <- data.obj.rff2$meta.dat$icd10_first_3_name_short %in% c('healthy',cancer)
+  data.obj.rff3 <- subset_data(data.obj.rff2, ind)
+  dist.obj.rff3 <- subset_dist(dist.obj.rff2, ind)
+  data.obj.rff3$meta.dat$icd10_first_3_name_short <- droplevels(data.obj.rff3$meta.dat$icd10_first_3_name_short)
+  
+  cat(sum(ind),'\n')
+  
+  for(i in c('LowCancer','HighCancer')){
+    setwd(rd)
+    dir <- 'ECI_subset0'
+    setwd(dir)
+    cat('[',cancer,']\n')
+    dir <- cancer
+    if(!dir.exists(dir)){dir.create(dir)}
+    setwd(dir)
+    
+    dir <- paste0('Control-',i)
+    if(!dir.exists(dir)){dir.create(dir)}
+    setwd(dir)
+    getwd()
+    
+    ind <- data.obj3$meta.dat$ECI22 %in% c('Control',i)
+    data.obj <- subset_data(data.obj3, ind)
+    dist.obj <- subset_dist(dist.obj3, ind)
+    cat(sum(ind),'\n')
+    
+    ind <- data.obj.rff3$meta.dat$ECI22 %in% c('Control',i)
+    data.obj.rff <- subset_data(data.obj.rff3, ind)
+    dist.obj.rff <- subset_dist(dist.obj.rff3, ind)
+    cat(sum(ind),'\n')
+    
+    data.obj$meta.dat$ECI22 <- factor(data.obj$meta.dat$ECI22,levels=c('Control',i))
+    data.obj.rff$meta.dat$ECI22 <- factor(data.obj.rff$meta.dat$ECI22,levels=c('Control',i))
+    
+    save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
+  }
+}
+
+variable <- "ECI22"; dir <- 'ECI_subset0'
+for(cancer in cancers){
+  for(dir in paste0('ECI_subset0/',cancer,'/Control-',c('LowCancer','HighCancer'))){
+    with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
+  }
+}
+
+
+
+
+### ===== Abx 365 subset analysis (pancancer: Abx Y vs HV, Abx N vs HV)======
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+if(!dir.exists(rd)) dir.create(rd)
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+
+load(file = 'Data/data.obj.raw.core.RData') 
+
+setwd(rd)
+dir <- 'Abx_day_365_subset'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
+
+data.obj2 <- data.obj
+data.obj.rff2 <- data.obj.rff
+dist.obj2 <- dist.obj
+dist.obj.rff2 <- dist.obj.rff
+
+for(i in c('Y','N')){
+  setwd(rd)
+  dir <- 'Abx_day_365_subset'
+  setwd(dir)
+  dir <- paste0('Control-',i)
+  if(!dir.exists(dir)){dir.create(dir)}
+  setwd(dir)
+  getwd()
+  
+  data.obj2$meta.dat$Abx_day_365 <- as.character(data.obj2$meta.dat$Abx_day_365)
+  data.obj2$meta.dat$Abx_day_365[data.obj2$meta.dat$Group=='Control'] <- 'Control'
+  ind <- data.obj2$meta.dat$Abx_day_365 %in% c('Control',i)
+  data.obj <- subset_data(data.obj2, ind)
+  dist.obj <- subset_dist(dist.obj2, ind)
+  cat(sum(ind),'\n')
+  
+  data.obj.rff2$meta.dat$Abx_day_365 <- as.character(data.obj.rff2$meta.dat$Abx_day_365)
+  data.obj.rff2$meta.dat$Abx_day_365[data.obj.rff2$meta.dat$Group=='Control'] <- 'Control'
+  ind <- data.obj.rff2$meta.dat$Abx_day_365 %in% c('Control',i)
+  data.obj.rff <- subset_data(data.obj.rff2, ind)
+  dist.obj.rff <- subset_dist(dist.obj.rff2, ind)
+  cat(sum(ind),'\n')
+  
+  data.obj$meta.dat$Abx_day_365 <- factor(data.obj$meta.dat$Abx_day_365,levels=c('Control',i))
+  data.obj.rff$meta.dat$Abx_day_365 <- factor(data.obj.rff$meta.dat$Abx_day_365,levels=c('Control',i))
+  
+  save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
+}
+
+
+variable <- "Abx_day_365"; dir <- 'Abx_day_365_subset'
+for(dir in paste0('Abx_day_365_subset/Control-',c('Y','N'))){
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
+}
+
+
+
+### ===== Abx 365 subset cancer vs HV analysis ======
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+if(!dir.exists(rd)) dir.create(rd)
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+
+load(file = 'Data/data.obj.raw.core.RData') 
+
+## keep cancers with Abx Y/N > 5 & cancer X sample > 15
+cancers <- names(which(rowSums(cbind(table(data.obj$meta.dat$icd10_first_3_name_short,data.obj$meta.dat$Abx_day_365)) > 2)==2))
+cancers2 <- names(which(table(data.obj$meta.dat$icd10_first_3_name_short)>15))
+cancers2 <- cancers2[cancers2!="healthy"]
+cancers <- intersect(cancers, cancers2)
+
+setwd(rd)
+dir <- 'Abx_day_365_subset'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
+
+data.obj2 <- data.obj
+data.obj.rff2 <- data.obj.rff
+dist.obj2 <- dist.obj
+dist.obj.rff2 <- dist.obj.rff
+
+## Subset cancer 
+for(cancer in cancers){
+  setwd(rd)
+  dir <- 'Abx_day_365_subset'
+  setwd(dir)
+  cat('[',cancer,']\n')
+  dir <- cancer
+  if(!dir.exists(dir)){dir.create(dir)}
+  setwd(dir)
+  getwd()
+  
+  ind <- data.obj2$meta.dat$icd10_first_3_name_short %in% c('healthy',cancer)
+  data.obj3 <- subset_data(data.obj2, ind)
+  dist.obj3 <- subset_dist(dist.obj2, ind)
+  cat(sum(ind),'\n')
+  
+  ind <- data.obj.rff2$meta.dat$icd10_first_3_name_short %in% c('healthy',cancer)
+  data.obj.rff3 <- subset_data(data.obj.rff2, ind)
+  dist.obj.rff3 <- subset_dist(dist.obj.rff2, ind)
+  cat(sum(ind),'\n')
+
+  for(i in c('Y','N')){
+    setwd(rd)
+    dir <- 'Abx_day_365_subset'
+    setwd(dir)
+    cat('[',cancer,']\n')
+    dir <- cancer
+    if(!dir.exists(dir)){dir.create(dir)}
+    setwd(dir)
+    getwd()
+    
+    dir <- paste0('Control-',i)
+    if(!dir.exists(dir)){dir.create(dir)}
+    setwd(dir)
+    getwd()
+    
+    data.obj3$meta.dat$Abx_day_365 <- as.character(data.obj3$meta.dat$Abx_day_365)
+    data.obj3$meta.dat$Abx_day_365[data.obj3$meta.dat$Group=='Control'] <- 'Control'
+    ind <- data.obj3$meta.dat$Abx_day_365 %in% c('Control',i)
+    data.obj <- subset_data(data.obj3, ind)
+    dist.obj <- subset_dist(dist.obj3, ind)
+    cat(sum(ind),'\n')
+    
+    data.obj.rff3$meta.dat$Abx_day_365 <- as.character(data.obj.rff3$meta.dat$Abx_day_365)
+    data.obj.rff3$meta.dat$Abx_day_365[data.obj.rff3$meta.dat$Group=='Control'] <- 'Control'
+    ind <- data.obj.rff3$meta.dat$Abx_day_365 %in% c('Control',i)
+    data.obj.rff <- subset_data(data.obj.rff3, ind)
+    dist.obj.rff <- subset_dist(dist.obj.rff3, ind)
+    cat(sum(ind),'\n')
+    
+    data.obj$meta.dat$Abx_day_365 <- factor(data.obj$meta.dat$Abx_day_365,levels=c('Control',i))
+    data.obj.rff$meta.dat$Abx_day_365 <- factor(data.obj.rff$meta.dat$Abx_day_365,levels=c('Control',i))
+    
+    save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
+  }
+}
+
+
+
+variable <- "Abx_day_365"
+for(cancer in cancers[5:17]){
+  for(dir in paste0('Abx_day_365_subset/',cancer,'/Control-',c('Y','N'))){
+    with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
+  }
+}
+
+
+
+
+### ===== PPI 365 subset analysis (pancancer: PPI Y vs HV, PPI N vs HV) ======
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+if(!dir.exists(rd)) dir.create(rd)
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+
+load(file = 'Data/data.obj.raw.core.RData') 
+
+setwd(rd)
+dir <- 'PPI_day_365_subset'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
+
+data.obj2 <- data.obj
+data.obj.rff2 <- data.obj.rff
+dist.obj2 <- dist.obj
+dist.obj.rff2 <- dist.obj.rff
+
+for(i in c('Y','N')){
+  setwd(rd)
+  dir <- 'PPI_day_365_subset'
+  setwd(dir)
+  dir <- paste0('Control-',i)
+  if(!dir.exists(dir)){dir.create(dir)}
+  setwd(dir)
+  getwd()
+  
+  data.obj2$meta.dat$PPI_day_365 <- as.character(data.obj2$meta.dat$PPI_day_365)
+  data.obj2$meta.dat$PPI_day_365[data.obj2$meta.dat$Group=='Control'] <- 'Control'
+  ind <- data.obj2$meta.dat$PPI_day_365 %in% c('Control',i)
+  data.obj <- subset_data(data.obj2, ind)
+  dist.obj <- subset_dist(dist.obj2, ind)
+  cat(sum(ind),'\n')
+  
+  data.obj.rff2$meta.dat$PPI_day_365 <- as.character(data.obj.rff2$meta.dat$PPI_day_365)
+  data.obj.rff2$meta.dat$PPI_day_365[data.obj.rff2$meta.dat$Group=='Control'] <- 'Control'
+  ind <- data.obj.rff2$meta.dat$PPI_day_365 %in% c('Control',i)
+  data.obj.rff <- subset_data(data.obj.rff2, ind)
+  dist.obj.rff <- subset_dist(dist.obj.rff2, ind)
+  cat(sum(ind),'\n')
+  
+  data.obj$meta.dat$PPI_day_365 <- factor(data.obj$meta.dat$PPI_day_365,levels=c('Control',i))
+  data.obj.rff$meta.dat$PPI_day_365 <- factor(data.obj.rff$meta.dat$PPI_day_365,levels=c('Control',i))
+  
+  save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
+}
+
+
+variable <- "PPI_day_365"; dir <- 'PPI_day_365_subset'
+for(dir in paste0('PPI_day_365_subset/Control-',c('Y','N'))){
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
+}
+
+
+
+
+### ===== PPI 365 subset cancer vs HV analysis ========
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+if(!dir.exists(rd)) dir.create(rd)
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+
+load(file = 'Data/data.obj.raw.core.RData') 
+
+## keep cancers with PPI Y/N > 5
+cancers <- names(which(rowSums(cbind(table(data.obj$meta.dat$icd10_first_3_name_short,data.obj$meta.dat$PPI_day_365)) > 5)==2))
+cancers <- names(which(rowSums(cbind(table(data.obj$meta.dat$icd10_first_3_name_short,data.obj$meta.dat$Abx_day_365))>5)==2))
+cancers2 <- names(which(table(data.obj$meta.dat$icd10_first_3_name_short)>15))
+cancers2 <- cancers2[cancers2!="healthy"]
+cancers <- intersect(cancers, cancers2)
+
+
+setwd(rd)
+dir <- 'PPI_day_365_subset'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
+
+data.obj2 <- data.obj
+data.obj.rff2 <- data.obj.rff
+dist.obj2 <- dist.obj
+dist.obj.rff2 <- dist.obj.rff
+
+## Subset cancer 
+for(cancer in cancers){
+  setwd(rd)
+  dir <- 'PPI_day_365_subset'
+  setwd(dir)
+  cat('[',cancer,']\n')
+  dir <- cancer
+  if(!dir.exists(dir)){dir.create(dir)}
+  setwd(dir)
+  getwd()
+  
+  ind <- data.obj2$meta.dat$icd10_first_3_name_short %in% c('healthy',cancer)
+  data.obj3 <- subset_data(data.obj2, ind)
+  dist.obj3 <- subset_dist(dist.obj2, ind)
+  cat(sum(ind),'\n')
+  
+  ind <- data.obj.rff2$meta.dat$icd10_first_3_name_short %in% c('healthy',cancer)
+  data.obj.rff3 <- subset_data(data.obj.rff2, ind)
+  dist.obj.rff3 <- subset_dist(dist.obj.rff2, ind)
+  cat(sum(ind),'\n')
+  
+  for(i in c('Y','N')){
+    setwd(rd)
+    dir <- 'PPI_day_365_subset'
+    setwd(dir)
+    cat('[',cancer,']\n')
+    dir <- cancer
+    if(!dir.exists(dir)){dir.create(dir)}
+    setwd(dir)
+    getwd()
+    
+    dir <- paste0('Control-',i)
+    if(!dir.exists(dir)){dir.create(dir)}
+    setwd(dir)
+    getwd()
+    
+    data.obj3$meta.dat$PPI_day_365 <- as.character(data.obj3$meta.dat$PPI_day_365)
+    data.obj3$meta.dat$PPI_day_365[data.obj3$meta.dat$Group=='Control'] <- 'Control'
+    ind <- data.obj3$meta.dat$PPI_day_365 %in% c('Control',i)
+    data.obj <- subset_data(data.obj3, ind)
+    dist.obj <- subset_dist(dist.obj3, ind)
+    cat(sum(ind),'\n')
+    
+    data.obj.rff3$meta.dat$PPI_day_365 <- as.character(data.obj.rff3$meta.dat$PPI_day_365)
+    data.obj.rff3$meta.dat$PPI_day_365[data.obj.rff3$meta.dat$Group=='Control'] <- 'Control'
+    ind <- data.obj.rff3$meta.dat$PPI_day_365 %in% c('Control',i)
+    data.obj.rff <- subset_data(data.obj.rff3, ind)
+    dist.obj.rff <- subset_dist(dist.obj.rff3, ind)
+    cat(sum(ind),'\n')
+    
+    data.obj$meta.dat$PPI_day_365 <- factor(data.obj$meta.dat$PPI_day_365,levels=c('Control',i))
+    data.obj.rff$meta.dat$PPI_day_365 <- factor(data.obj.rff$meta.dat$PPI_day_365,levels=c('Control',i))
+    
+    save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
+  }
+}
+
+
+
+variable <- "PPI_day_365"
+for(cancer in cancers){
+  for(dir in paste0('PPI_day_365_subset/',cancer,'/Control-',c('Y','N'))){
+    with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
+  }
+}
+
+############################## add  Cancer Only (ECI binary, <=median or ECI=0,1 as low) #######################################
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+
+getwd()
+load(file = 'Data/data.obj.raw.core.RData') 
+
+
+setwd(rd)
+dir <- 'CancerOnly'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
+
+ind <- data.obj$meta.dat$Group == 'Cancer'
+data.obj <- subset_data(data.obj, ind)
+dist.obj <- subset_dist(dist.obj, ind)
+
+ind <- data.obj.rff$meta.dat$Group == 'Cancer'
+data.obj.rff <- subset_data(data.obj.rff, ind)
+dist.obj.rff <- subset_dist(dist.obj.rff, ind)
+
+data.obj$meta.dat$Elix_score2_med <- ifelse(data.obj$meta.dat$Elix_score <= median(data.obj$meta.dat$Elix_score), 'Low','High')
+data.obj$meta.dat$Elix_score2_01 <- ifelse(data.obj$meta.dat$Elix_score <=1, 'Low', 'High')
+data.obj$meta.dat$Elix_score2_0 <- ifelse(data.obj$meta.dat$Elix_score <=1, 'Low', 
+                                          ifelse(data.obj$meta.dat$Elix_score >=4,'High',NA))
+data.obj$meta.dat$Elix_score3 <- ifelse(data.obj$meta.dat$Elix_score <=1, 'Low', 
+                                          ifelse(data.obj$meta.dat$Elix_score >=4,'High',"Mid"))
+
+data.obj$meta.dat$Elix_score2_med <- factor(data.obj$meta.dat$Elix_score2_med,levels=c('Low',"High"))
+data.obj$meta.dat$Elix_score2_01 <- factor(data.obj$meta.dat$Elix_score2_01,levels=c('Low',"High"))
+data.obj$meta.dat$Elix_score2_0 <- factor(data.obj$meta.dat$Elix_score2_0,levels=c('Low',"High"))
+data.obj$meta.dat$Elix_score3 <- factor(data.obj$meta.dat$Elix_score3,levels=c('Low',"Mid","High"))
+
+
+data.obj.rff$meta.dat$Elix_score2_med <- ifelse(data.obj.rff$meta.dat$Elix_score <= median(data.obj.rff$meta.dat$Elix_score), 'Low','High')
+data.obj.rff$meta.dat$Elix_score2_01 <- ifelse(data.obj.rff$meta.dat$Elix_score <=1, 'Low', 'High')
+data.obj.rff$meta.dat$Elix_score2_0 <- ifelse(data.obj.rff$meta.dat$Elix_score <=1, 'Low', 
+                                              ifelse(data.obj.rff$meta.dat$Elix_score >=4,'High',NA))
+data.obj.rff$meta.dat$Elix_score3 <- ifelse(data.obj.rff$meta.dat$Elix_score <=1, 'Low', 
+                                        ifelse(data.obj.rff$meta.dat$Elix_score >=4,'High',"Mid"))
+
+
+data.obj.rff$meta.dat$Elix_score2_med <- factor(data.obj.rff$meta.dat$Elix_score2_med,levels=c('Low',"High"))
+data.obj.rff$meta.dat$Elix_score2_01 <- factor(data.obj.rff$meta.dat$Elix_score2_01,levels=c('Low',"High"))
+data.obj.rff$meta.dat$Elix_score2_0 <- factor(data.obj.rff$meta.dat$Elix_score2_0,levels=c('Low',"High"))
+data.obj.rff$meta.dat$Elix_score3 <- factor(data.obj.rff$meta.dat$Elix_score3,levels=c('Low',"Mid","High"))
+
+
+save(data.obj, dist.obj, data.obj.rff, dist.obj.rff, file = 'data.obj.wk.RData')
+
+variables <- c('Elix_score2_med','Elix_score2_01','Elix_score2_0','Elix_score3')
+dir <- 'CancerOnly'
+for(variable in variables){
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(taxon_script))
+}
+
+
 
 ##---------------------------- functional data analysis-----------------------------------
 ############################## Cancer Only func #######################################
@@ -562,7 +1471,8 @@ save(data.obj, dist.obj, file = 'data.obj.wk.RData')
 
 
 covars <- c("Batch","Bristol_score","BMI", "Age", "Sex", "GI_nonGI","Cancer_class","Metastasis","PPI_day_365", "Abx_day_365",
-            "PPI_last_month","Abx_last_month","Charlson_score","Elix_score","Sample_season","Urban","icd10_first_3_name_short", "Site")
+            "PPI_last_month","Abx_last_month","Charlson_score","Elix_score","Sample_season","Urban","icd10_first_3_name_short", "Site",
+            "smoking_category","prior_chemotherapy")
 blood.names <- c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count',
                  'Neutrophils_cat','Platelet.Count_cat','Hemoglobin_cat',
                  "neut_neutropenia2","bone_marrow_suppression2","Hb_anemia2","Pl_thrombocytopenia2","neut_neutropenia_c","Hb_anemia_c","Pl_thrombocytopenia_c")
@@ -591,6 +1501,46 @@ for(variable in variables){
 # }
 # 
 # variables <- xx
+
+############################## Cancer Only (smoking for lung cancer) func #######################################
+file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
+file_dir <- dirname(dirname(dirname(dirname(file_dir))))
+
+wd <- file_dir
+rd <- paste0(file_dir,'/Result/')
+
+setwd(wd)
+source(paste0(file_dir,"/Code/Submission/MayoOncobiomeStudy/Code/Stats.R"))
+try(load_package())
+
+getwd()
+load(file = 'Data/data.obj.pathway.RData') 
+
+
+setwd(rd)
+dir <- 'LungCancer_Smoking_func'
+if(!dir.exists(dir)){dir.create(dir)}
+setwd(dir)
+getwd()
+
+ind <- rownames(data.obj$meta.dat[data.obj$meta.dat$icd10_first_3_name_short == 'bronchus lung',])
+data.obj <- subset_data(data.obj, ind)
+dist.obj <- subset_dist(dist.obj, ind)
+identical(rownames(data.obj$meta.dat), rownames(dist.obj$BC))
+identical(rownames(data.obj$meta.dat), colnames(dist.obj$BC))
+data.obj$meta.dat$smoking_category2 <- data.obj$meta.dat$smoking_category
+data.obj$meta.dat$smoking_category2[data.obj$meta.dat$smoking_category2 %in% c("Current","Former")] <- "Yes"
+save(data.obj, dist.obj, file = 'data.obj.wk.RData')
+
+identical(colnames(dist.obj$Euc),colnames(data.obj$otu.tab))
+
+variables <- c("smoking_category","smoking_category2")
+dir <- 'LungCancer_Smoking_func'
+for(variable in variables){
+  with(list(commandArgs = function(...) c("--args", variable, dir)), source(func_script))
+}
+
+
 
 ############################## sub Cancer X vs [Cancers-sub Cancer X] func #######################################
 file_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
@@ -822,3 +1772,11 @@ save(data.obj, dist.obj, file = 'data.obj.wk.RData')
 
 variable <- "Group"; dir <- 'PanCancer_func'
 with(list(commandArgs = function(...) c("--args", variable, dir)), source(func_script))
+
+
+
+
+
+
+
+

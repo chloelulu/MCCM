@@ -164,8 +164,6 @@ col <- c("#0072B2", col_fun(diff_vec))
 names(col) <- c('healthy',names(cancer.dir))
 
 
-png('../Figure/RM_figures/PCoA centroids cancer classes.png', width = 9*300, height = 8.5*300, res=300)
-
 p12 <- ggplot(yy, aes(x = PC1, y = PC2, fill = cancer)) +
   geom_point(size =6, shape = 21) +
   scale_x_continuous(limits = c(min(yy$PC1)*1.2,max(yy$PC1)*1.2))+
@@ -187,8 +185,17 @@ p12 <- ggplot(yy, aes(x = PC1, y = PC2, fill = cancer)) +
         axis.ticks.length = unit(0.2, 'cm'),
         panel.grid.minor = element_blank())
 
-print(p12)
 
+
+png('../Figure/RM_figures/PCoA centroids cancer classes.png', width = 9*300, height = 8.5*300, res=300)
+print(p12)
+dev.off()
+
+
+
+#20250213 #centroids wide format for poster
+png('../Figure/RM_figures/PCoA centroids cancer classes_wide_poster.png', width = 10.5*300, height = 7.5*300, res=300)
+print(p12)
 dev.off()
 
 
@@ -238,13 +245,30 @@ tmp <- N[max.col(N.mat)]
 Y <- Y + N.mat / tmp
 logY <- log2(Y)
 W <- t(t(logY) - colMeans(logY))
-sub <- W[c("p__Bacteroidota;g__Bacteroides","p__Firmicutes_A;g__Blautia","p__Firmicutes_A;g__Faecalimonas"),]
+
+
+
+#eventually update these arrows using the coabundance networks; or change the names here
+#update to the most prevalent genera (this is from most prevalent down)
+
+#rownames(W)[grep("Anaerostipes", rownames(W))]
+#rownames(W)[grep("Blautia", rownames(W))]
+#rownames(W)[grep("Anaerobutyricum", rownames(W))]
+#rownames(W)[grep("Streptococcus", rownames(W))]
+#rownames(W)[grep("Roseburia", rownames(W))]
+#rownames(W)[grep("Bacteroides", rownames(W))]
+
+#this is not very prevalent but potentially orthogonal
+#rownames(W)[grep("Prevotella", rownames(W))]
+
+
+sub <- W[c("p__Bacteroidota;g__Bacteroides","p__Firmicutes_A;g__Blautia",
+           "p__Bacteroidota;g__Prevotella","p__Firmicutes;g__Streptococcus"),]
 rownames(sub) <- gsub('.*g__','',rownames(sub))
 
 yy2 <- yy %>% mutate(grp = ifelse(icd10_first_3_name=='Control','Control','Cancer')) %>% 
   dplyr::filter(icd10_first_3_name %in% c(names(cancer.dir),'Control'))
 yy2 <- merge(yy2 %>% column_to_rownames("Row.names"), t(sub),by = 0)
-
 
 
 #orange       skyblue   bluishgreen        yellow          blue    vermillion reddishpurple 
@@ -255,14 +279,10 @@ yy2 <- merge(yy2 %>% column_to_rownames("Row.names"), t(sub),by = 0)
 sel_colors_plot <- c("#CC79A7", "#0072B2") #reddishpurple and blue
 
 
-
-#eventually update these arrows using the coabundance networks
-
-
-species_data <- yy2[, c("Bacteroides", "Blautia", "Faecalimonas")]
+species_data <- yy2[, c("Bacteroides", "Blautia", "Prevotella", "Streptococcus")]
 pc_data <- yy2[, c("PC1", "PC2")]
 arrows_data <- data.frame(
-  species = c("Bacteroides", "Blautia", "Faecalimonas"),
+  species = c("Bacteroides", "Blautia", "Prevotella", "Streptococcus"),
   x_end = apply(species_data, 2, function(s) cor(s, pc_data$PC1, method='spearman')),  
   y_end = apply(species_data, 2, function(s) cor(s, pc_data$PC2, method='spearman')) 
 )
@@ -278,9 +298,9 @@ p2 <- ggplot(yy2) +
   scale_color_manual(name = '', values = sel_colors_plot) +       
   labs(x = xlab, y = ylab, fill = '', color = '') +       
   theme_bw() +       
-  theme(text = element_text(size = 20, color = "black"),
+  theme(text = element_text(size = 15, color = "black"),
         axis.text = element_text(size = 15, color = "black"),
-        legend.text = element_text(size = 20, color = "black"),
+        legend.text = element_text(size = 15, color = "black"),
         axis.title = element_text(size = 15, color = "black"),
         panel.grid.major = element_blank(),
         panel.border = element_rect(size = 1),
@@ -300,7 +320,7 @@ p2 <- ggMarginal(p2, type = "density", margins = "both", size = 5, groupFill = T
 # Calculate new correlations for PC2 vs PC3
 pc_data_pc23 <- yy2[, c("PC2", "PC3")]  # Use PC2 and PC3 instead of PC1 and PC2
 arrows_data_pc23 <- data.frame(
-  species = c("Bacteroides", "Blautia", "Faecalimonas"),
+  species = c("Bacteroides", "Blautia", "Prevotella", "Streptococcus"),
   x_end = apply(species_data, 2, function(s) cor(s, pc_data_pc23$PC2, method = 'spearman')),  # Correlation with PC2
   y_end = apply(species_data, 2, function(s) cor(s, pc_data_pc23$PC3, method = 'spearman'))   # Correlation with PC3
 )
@@ -325,9 +345,9 @@ p3 <- ggplot(yy2) +
   labs(x = xlab_pc23, y = ylab_pc23, fill = '', color = '') +       
   theme_bw() +       
   theme(text = element_text(size = 15, color = "black"),
-        axis.text = element_text(size = 20, color = "black"),
+        axis.text = element_text(size = 15, color = "black"),
         legend.text = element_text(size = 15, color = "black"),
-        axis.title = element_text(size = 20, color = "black"),
+        axis.title = element_text(size = 15, color = "black"),
         panel.grid.major = element_blank(),
         panel.border = element_rect(size = 1),
         axis.ticks = element_line(size = 1),
@@ -347,7 +367,7 @@ p3 <- ggMarginal(p3, type = "density", margins = "both", size = 5, groupFill = T
 p <- ggarrange(p2, p3, nrow =1, common.legend = F)
 print(p)
 #ggsave('PCoA_v2.pdf', width = 16, height = 8)
-ggsave('../Figure/RM_figures/PCoA_v2.png', width = 16, height = 7)
+ggsave('../Figure/RM_figures/PCoA_v2_new_names.png', width = 11, height = 5)
 
 
 
@@ -388,6 +408,11 @@ alpha$icd10_first_3_name <- as.factor(alpha$icd10_first_3_name)
 rownames(pval) <- gsub("_", " ", rownames(pval))
 rownames(pval) <- as.character(tolower(gsub("Malignant neoplasm of |Malignant |malignant |Other and | neoplasm| neoplasm of| neoplasms|neoplasm of |\\,|and ", "",  rownames(pval))))
 rownames(pval)[rownames(pval) == "plasma cell"] <- "multiple myeloma plasma cell"
+
+
+#replace control by healthy
+alpha$icd10_first_3_name <- gsub("control", "healthy", alpha$icd10_first_3_name)
+#table(alpha$icd10_first_3_name )
 
 
 ord <- as.vector((aggregate(Shannon ~ icd10_first_3_name, data=alpha, function(x) median(x)) %>% arrange(Shannon))[,1])
@@ -431,6 +456,7 @@ ggsave(file = paste0('alpha cancer class vs control violin main text.png'), plot
 
 
 
+
 #-------------------------------------------------------------------------------
 ## ==== Figure X ======
 vars.incl <- covars[!(covars %in% c("Batch","Cancer_class"))]
@@ -445,7 +471,7 @@ pval_coef_adj[pval_coef_adj[,'R2'] < 0,'R2'] <- 0
 pval_coef_adj <- as.data.frame(pval_coef_adj) %>% 
   mutate(direction = ifelse(is.na(coef),'none',ifelse(coef>0, 'positive','negative'))) %>%
   dplyr::select(-coef) %>%
-  tibble::rownames_to_column('var') %>% melt()
+  tibble::rownames_to_column('var') %>% reshape2::melt()
 sub.r <- pval_coef_adj[pval_coef_adj$variable=='R2',]
 sub.p <- pval_coef_adj[pval_coef_adj$variable=='P',c('var','value')] %>% 
   mutate(P.col = ifelse(value<0.05,'sig','no')) %>% dplyr::select(-value)
@@ -457,7 +483,7 @@ pval_coef_unadj[pval_coef_unadj[,'R2']<0,'R2'] <- 0
 pval_coef_unadj <- as.data.frame(pval_coef_unadj) %>% 
   mutate(direction = ifelse(is.na(coef),'none',ifelse(coef>0, 'positive','negative'))) %>%
   dplyr::select(-coef) %>%
-  tibble::rownames_to_column('var') %>% melt()
+  tibble::rownames_to_column('var') %>% reshape2::melt()
 sub.r <- pval_coef_unadj[pval_coef_unadj$variable=='R2',]
 sub.p <- pval_coef_unadj[pval_coef_unadj$variable=='P',c('var','value')] %>% 
   mutate(P.col = ifelse(value<0.05,'sig','no')) %>% dplyr::select(-value)
@@ -580,6 +606,8 @@ dev.off()
 setwd("~/Library/Mobile Documents/com~apple~CloudDocs/mforge_clean/Figure/RM_figures/")
 ggsave(file = 'Figure1_main.svg', plot=main_div_plot, width = 12, height = 4.75)
 
+setwd("/Users/M216453/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Figure/RM_figures/")
+ggsave(file = 'Figure1_main_Abx_PPI_lastmonth_changed.svg', plot=main_div_plot, width = 12, height = 4.75)
 
 
 sel_colors
@@ -782,7 +810,6 @@ ggsave(file = paste0('main_elix_div_plot.png'), plot=elix_div_plot, width = 9, h
 
 #-------------------------------------------------------------------------------
 ## === Elix components tree =====
-
 #adjusted the cutoffs to make it more legible
 setwd(wd)
 load('Data/data.obj.raw.core.RData')
@@ -861,7 +888,7 @@ dd <- within(dd, species <- factor(species, levels = tree.sub$tip.label))
 ord <- gsub('f\\_\\_|p\\_\\_|o\\_\\_|c\\_\\_|g\\_\\_','',unique(otu.name[get_taxa_name(ggtree(tree.sub)),branch.level]))
 gc()
 plt1 <- ggtree(tree.sub, layout = 'circular') + 
-  geom_tiplab(align=T,aes(color =taxa.split), fontface='italic',size =5) +
+  geom_tiplab(align=T,aes(color =taxa.split), fontface='italic',size =4.6) +
   scale_color_manual(values = c(brewer.pal(12,'Paired')[-c(1,11)],brewer.pal(8,'Dark2')[-4],brewer.pal(8,'Set2')), breaks = ord) + 
   labs(color = branch.level) +
   theme(legend.position="right", legend.text = element_text(size = 16, color = 'black', face = 'italic'),legend.title = element_text(size = 16, color = 'black')) +
@@ -893,28 +920,36 @@ grep(dup[1], xx2)
 pos <-  xx2[grep('Positive',xx2)]
 neg <- xx2[grep('Negative',xx2)] 
 
-col <- c(brewer.pal(8,'Reds')[c(8,5)],brewer.pal(8,'Purples')[c(4,8)],brewer.pal(8,'Set1')[c(8)],brewer.pal(8,'Set2')[c(6)],
-         brewer.pal(8,'Greens')[c(8,6)],brewer.pal(8,'Dark2')[c(2:6)],brewer.pal(8,'Blues')[c(8,6)])[1:length(c(pos,neg))]
+col <- c(brewer.pal(8,'Reds')[c(8,6)], # red: "ECI score (Positive)" ,"ECI score (Negative)"  
+         brewer.pal(8,'Purples')[c(8,6)], # purple:Cardiac arrhythmias (Positive),Cardiac arrhythmias (Negative)
+         brewer.pal(8,'Set1')[c(8)], #pink
+         brewer.pal(8,'Oranges')[c(6,5)], # Oranges: Diabetes with chronic complications (Positive), Negative
+         brewer.pal(8,'Greens')[c(8,4)],# green: Fluid and electrolyte disorders (Positive), Negative
+         brewer.pal(8,'Greys')[c(6)],#grey:  "Liver disease (Positive)" 
+         brewer.pal(8,'RdPu')[c(4,3)],# PurpleRed: "Other neurologic disorders (Positive), Negative
+         brewer.pal(8,'Dark2')[c(7,6)],# Yellow: "Peptic ulcer disease (excluding bleeding) (Positive), Negative
+         brewer.pal(8,'Blues')[c(8,4)], #Blues: Weight loss (Positive), Negative
+         brewer.pal(8,'Greys')[c(8,4)]
+)[1:length(c(pos,neg))]
 col1 <- c(col,'white')
 names(col1) <- c(xx2,'No')
 
-new_order <- c(1:2,4,3,5:13)
-xx2 <- xx2[new_order]
+# new_order <- c(1:2,4,3,5:13)
+# xx2 <- xx2[new_order]
 breaks_to_show <- xx2
 
 gc()
-gheatmap(plt1, tree.tmp, offset=3, width=0.8, font.size=4, color = brewer.pal(9,'Set1')[9], colnames = F) +
+gheatmap(plt1, tree.tmp, offset=1.9, width=0.6, font.size=4, color = brewer.pal(9,'Set1')[9], colnames = F) +
   scale_fill_manual(values=col1, name="",breaks=breaks_to_show, 
                     guide = guide_legend(label.theme = element_text(angle = 0, face = 'plain'))) 
 
 
 setwd(mfd)
-if(cutoff ==0.05){width = height = 24}
-if(cutoff ==0.01){width = height = 14}
-#ggsave(paste0('Figure2B_v2.pdf'), width = 19, height = 18)
+if(cutoff ==0.05){width = height = 30}
+if(cutoff ==0.01){width = height = 16}
+#ggsave(paste0('../Figure/RM_figures/Figure2B_v2.pdf'), width = 19, height = 18)
 ggsave(paste0('../Figure/RM_figures/elix_components circle plot_RM.png'), width = width, height = height)
 gc()
-
 
 
 
@@ -930,7 +965,7 @@ pval_coef_adj[pval_coef_adj[,'R2']<0,'R2'] <- 0
 pval_coef_adj <- as.data.frame(pval_coef_adj) %>% 
   mutate(direction = ifelse(is.na(coef),'none',ifelse(coef>0, 'positive','negative'))) %>%
   dplyr::select(-coef) %>%
-  tibble::rownames_to_column('var') %>% melt()
+  tibble::rownames_to_column('var') %>% reshape2::melt()
 sub.r <- pval_coef_adj[pval_coef_adj$variable=='R2',]
 sub.p <- pval_coef_adj[pval_coef_adj$variable=='P',c('var','value')] %>% 
   dplyr::mutate(P.col = ifelse(value<0.05,'sig','no')) %>% dplyr::select(-value)
@@ -1294,3 +1329,146 @@ ggarrange(p1, p2, p3, nrow =1, labels = c('A.','','B.'))
 
 
 
+## ==== chemotherapy_last_2_years =====
+setwd("/Users/luyang1/Library/Mobile Documents/com~apple~CloudDocs/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Result/CancerOnly/")
+tm <- load('Alpha/chemotherapy_last_2_years/Alpha.RData')
+tm
+alpha.df <- merge(alpha.obj1, data.obj.rff3$meta.dat[,c('chemotherapy_last_2_years'), drop =F], by = 0) 
+head(alpha.df)
+p1 <- ggplot(alpha.df, aes(x =chemotherapy_last_2_years, y = Shannon)) +
+  geom_violin(trim = F, aes(fill =chemotherapy_last_2_years)) + 
+  geom_boxplot(width=0.1, outlier.size = 0.7) +
+  scale_fill_brewer(palette = 'Dark2') + 
+  theme_classic() + 
+  theme(axis.text = element_text(color = 'black', size = 20),
+        legend.text = element_text(color = 'black', size = 20),
+        legend.title  = element_text(color = 'black', size = 20),
+        legend.position = 'none',
+        axis.title = element_text(color = 'black', size = 20)) + 
+  labs(x = '', y = 'Shannon diversity index',fill = 'Chemotherapy(last 2 years)') +
+  # annotate("text", 
+  #          x = 1.5, 
+  #          y = max(alpha.df$Shannon) * 1.1, 
+  #          label = paste0('P = ', round(fit2$res['Shannon', 'P'], 2)), 
+  #          size = 5, color = "black") +
+  geom_bracket(
+    xmin = 1, xmax = 2,
+    y.position = max(alpha.df$Shannon) * 1.1,
+    tip.length = 0.02,
+    label = paste0('P = ', round(fit2$res['Shannon', 'P'], 2)), 
+    size = 0.5, label.size = 6 
+  )
+p1
+
+source("/Users/luyang1/myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Code/Stats.R")
+rd <- '/Users/luyang1/myicloud/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Result/'
+dir <- 'CancerOnly/'
+setwd(paste0(rd, dir))
+load(file = 'data.obj.wk.RData')
+variable <- 'chemotherapy_last_2_years'
+dist.name <- 'WUniFrac'
+covars <- c("Batch","Bristol_score","BMI", "Age", "Sex", "GI_nonGI","Cancer_class","Metastasis","PPI_day_365", "Abx_day_365",
+            "PPI_last_month","Abx_last_month","Charlson_score","Elix_score","Sample_season","Urban")
+adj.name <- covars[!(covars %in% c(variable,'GI_nonGI',"Charlson_score","Abx_last_month","PPI_last_month"))]
+tmp <- !is.na(data.obj.rff$meta.dat[, c(variable, adj.name), drop =F])
+ind3 <- rowSums(tmp)==length(c(variable,adj.name))
+data.obj.rff3 <- subset_data(data.obj.rff, ind3)
+dist.obj.rff3 <- subset_dist(dist.obj.rff, ind3)
+
+obj <- cmdscale(as.dist(dist.obj.rff3[[dist.name]]), k=2, eig=T)
+pve <- round(obj$eig[1:2]/sum(abs(obj$eig))*100, 1)
+y <- cbind.data.frame(PC1=obj$points[, 1], PC2=obj$points[, 2])
+xlab <- paste0('PC1(', pve[1], '%)')
+ylab <- paste0('PC2(', pve[2], '%)')
+yy <- merge(y, data.obj.rff3$meta.dat[,variable, drop =F], by = 0)
+tm <- load('Beta/chemotherapy_last_2_years/R2_pvalue.RData')
+centroids <- yy %>%
+  group_by(!!as.name(variable)) %>%
+  summarise(centroid_PC1 = mean(PC1), centroid_PC2 = mean(PC2))
+yy_with_centroids <- yy %>%
+  left_join(centroids, by = variable)
+p2 <- ggplot(yy_with_centroids, aes(x = PC1, y = PC2, color = !!as.name(variable))) +
+  geom_segment(aes(x = centroid_PC1, y = centroid_PC2, 
+                   xend = PC1, yend = PC2, color = !!as.name(variable)), 
+               size = 0.3, alpha = 0.6, show.legend = FALSE) + 
+  geom_point(
+    aes(shape = !!as.name(variable), fill = !!as.name(variable)), 
+    color = "black", size = 1.5, alpha = 0.7, show.legend = F) +
+  ggforce::geom_mark_ellipse(aes(x = PC1, y = PC2, color = !!as.name(variable)), 
+                             expand = unit(0, "mm")) +
+  geom_point(aes(x = centroid_PC1, y = centroid_PC2, 
+                 shape = !!as.name(variable)), 
+             fill = "white", color = 'black', size = 2, stroke = 0.8) +
+  theme_bw() +
+  scale_x_continuous(limits = c(min(yy$PC1)*1.1, max(yy$PC1)*1)) +
+  scale_y_continuous(limits = c(min(yy$PC2)*1, max(yy$PC2)*1.1)) +
+  scale_color_brewer(palette = 'Dark2') +
+  scale_shape_manual(values = c(21, 24, 25,22, 23)) +
+  scale_fill_brewer(palette = 'Dark2')    +
+  labs(x = xlab, y = ylab, color = '', shape = '') +
+  theme(text = element_text(size = 20, color = "black"),
+        axis.text = element_text(size = 20, color = "black"),
+        legend.text = element_text(size = 20, color = "black"),
+        legend.title = element_blank(),
+        axis.title = element_text(size = 20, color = "black"),
+        panel.grid.major = element_blank(),
+        panel.border = element_rect(size = 2),
+        axis.ticks = element_line(size = 1),
+        axis.ticks.length = unit(0.2, 'cm'),
+        panel.grid.minor = element_blank()) +
+  annotate("text", 
+           x = max(yy$PC1) * 0.9, 
+           y = min(yy$PC2) * 0.95, 
+           label = paste0('P=',round(pv.adj.mat['WUniFrac',],2), 
+                          '       \n R²=',round(r2.adj.mat['WUniFrac',],5)), 
+           hjust = 1, vjust = 0, 
+           size = 5, color = "black") 
+
+p2
+tm <- load('DAA/chemotherapy_last_2_years/chemotherapy_last_2_years_ZicoSeq.Rdata')
+tm
+
+df <- cbind.data.frame(EffectSize=sign(diff.obj$coef.list$Species[,'chemotherapy_last_2_yearsyes', drop =F]) * diff.obj$R2.list$Species, qvalue =diff.obj$qv.list$Species )
+colnames(df)[1:2] <- c('EffectSize','qvalue')
+head(df)
+df$log10_qvalue <- -log10(df$qvalue)
+df$species <- rownames(df)
+q_cutoff <- 0.1
+effect_cutoff <- 1
+df <- df %>%
+  mutate(
+    sig = case_when(
+      qvalue < q_cutoff & EffectSize > effect_cutoff ~ "Yes",
+      qvalue < q_cutoff & EffectSize < -effect_cutoff ~ "No",
+      TRUE ~ "FDR>0.1"
+    )
+  )
+
+p3 <- ggplot(df, aes(x = EffectSize, y = log10_qvalue, color = sig)) +
+  geom_point(size = 1.5, alpha = 0.7) +
+  scale_color_manual(values = c("Up" = "firebrick", "Down" = "steelblue", "FDR>0.1" = "grey70")) +
+  # geom_vline(xintercept = c(-effect_cutoff, effect_cutoff), linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(q_cutoff), linetype = "dashed", color = "black") +
+  labs(x = "Effect Size", y = expression(-log[10]~qvalue), color = "Significance") +
+  theme_bw() +
+  theme(text = element_text(size = 20, color = "black"),
+        axis.text = element_text(size = 20, color = "black"),
+        legend.text = element_text(size = 20, color = "black"),
+        legend.title = element_text(size = 20, color = "black"),
+        axis.title = element_text(size = 20, color = "black"),
+        panel.grid.major = element_blank(),
+        panel.border = element_rect(size = 2),
+        axis.ticks = element_line(size = 1),
+        axis.ticks.length = unit(0.2, 'cm'),
+        panel.grid.minor = element_blank())
+p3
+ggarrange(p1, p2, p3,
+          nrow = 1,
+          widths = c(1, 2, 2),
+          labels = c("A", "B", "C"),        # Add labels
+          label.x = 0,                      # Horizontal position (0 = left)
+          label.y = 1,                      # Vertical position (1 = top)
+          font.label = list(size =24, face = "bold"))  # Customize font
+getwd()
+setwd("/Users/luyang1/Library/Mobile Documents/com~apple~CloudDocs/Documents/Mayo_project/2023_01_09_Oncobiome/mforge_clean/Figure/RM_figures/")
+ggsave(file = 'chemotherapy_last_2_yearsyes.pdf', width = 20, height = 6)

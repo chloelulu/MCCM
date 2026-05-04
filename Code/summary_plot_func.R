@@ -5,6 +5,7 @@ summary_plot <- function(
   figure.dir,
   
   alpha.summary = T,
+  alpha.measures = c("Observed","Chao1","Shannon","InvSimpson"),
   alpha.plot = T,
   beta.summary = T,
   beta.plot = T,
@@ -45,7 +46,7 @@ summary_plot <- function(
   # Alpha 
   if(alpha.summary==T){
     cat('----- Alpha Diveristy Summary -----\n')
-    alpha.measures <- c("Observed","Chao1","Shannon","InvSimpson")
+    
     setwd(wd)
     if(length(main.dirs)>length(dirs)){
       len <- (main.dirs)
