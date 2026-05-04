@@ -24,7 +24,8 @@ source('Code/summary_plot_func.R')
 q.cut <- 0.05; p.cut <- 0.05; abund.cut <- 0.01; prev.cut <- 0.2
 q.cut1 <- 0.001; q.cut2 <- 0.01; q.cut3 <- 0.05
 covars <- c("Batch","Bristol_score","BMI", "Age", "Sex", "GI_nonGI","Cancer_class","Metastasis","PPI_day_365", "Abx_day_365", 
-            "PPI_last_month","Abx_last_month","Charlson_score","Elix_score","Sample_season","Urban" ,"icd10_first_3_name_short", "Site")
+            "PPI_last_month","Abx_last_month","Charlson_score","Elix_score","Sample_season","Urban" ,"icd10_first_3_name_short", "Site",
+            "smoking_category","prior_chemotherapy")
 blood.names <- c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count',
                  'Neutrophils_cat','Platelet.Count_cat','Hemoglobin_cat',
                  "neut_neutropenia2","bone_marrow_suppression2","Hb_anemia2","Pl_thrombocytopenia2","neut_neutropenia_c","Hb_anemia_c","Pl_thrombocytopenia_c")
@@ -39,13 +40,13 @@ obj <- summary_plot(
   main.dirs = main.dirs,
   dirs = dirs,
   figure.dir = main.dirs,
-  alpha.summary = T,
+  alpha.summary = F,
   alpha.plot = F,
   beta.summary = F,
   beta.plot =F,
 
   taxa.levels = c("Species"),
-  DAA.summary =F,
+  DAA.summary =T,
   DAA.plot = F,
 
   q.cut = q.cut,
@@ -134,11 +135,11 @@ obj <- summary_plot(
   main.dirs = main.dirs,
   dirs =  dirs,
   figure.dir = figure.dir,
-  alpha.summary = T,
+  alpha.summary = F,
   alpha.plot = F,
   beta.summary =F,
   beta.plot =F,
-  DAA.summary = F,
+  DAA.summary =T,
   taxa.levels = c("Species"),
   volcano.plot = F,
   volcano.top = 10,
@@ -203,11 +204,11 @@ obj <- summary_plot(
   main.dirs = main.dirs,
   dirs =  dirs,
   figure.dir = figure.dir,
-  alpha.summary =T,
+  alpha.summary =F,
   alpha.plot = F,
   beta.summary =F,
   beta.plot =F,
-  DAA.summary =F,
+  DAA.summary =T,
   taxa.levels = c("Species"),
   volcano.plot =F,
   volcano.level = 'Species',
@@ -257,7 +258,8 @@ setwd(rd)
 q.cut <- 0.05; p.cut <- 0.05; abund.cut <- 0.01; prev.cut <- 0.2
 q.cut1 <- 0.001; q.cut2 <- 0.01; q.cut3 <- 0.05
 covars <- c("Batch","Bristol_score","BMI", "Age", "Sex", "GI_nonGI","Cancer_class","Metastasis","PPI_day_365", "Abx_day_365",
-            "PPI_last_month","Abx_last_month","Charlson_score","Elix_score","Sample_season","Urban","icd10_first_3_name_short", "Site")
+            "PPI_last_month","Abx_last_month","Charlson_score","Elix_score","Sample_season","Urban","icd10_first_3_name_short", "Site",
+            "smoking_category","prior_chemotherapy")
 blood.names <- c('Erythrocytes','Hematocrit','Neutrophils','MCV','Hemoglobin','Leukocytes','Platelet.Count',
                  'Neutrophils_cat','Platelet.Count_cat','Hemoglobin_cat',
                  "neut_neutropenia2","bone_marrow_suppression2","Hb_anemia2","Pl_thrombocytopenia2","neut_neutropenia_c","Hb_anemia_c","Pl_thrombocytopenia_c")
@@ -278,7 +280,7 @@ obj <- summary_plot(
   figure.dir = 'CancerOnly_func/pathway',
   alpha.summary = F,
   alpha.plot = F,
-  beta.summary =F,
+  beta.summary =T,
   beta.plot = F,
   DAA.summary =T,
   volcano.plot =F,
