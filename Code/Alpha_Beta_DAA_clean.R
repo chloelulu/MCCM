@@ -35,8 +35,8 @@ if(dir %in% c('CancerOnly')){
     adj.name <- covars[!(covars %in% c(variable,'Cancer_class',"Charlson_score","Abx_last_month","PPI_last_month"))]
   }else if(variable =="Charlson_score"){
     adj.name <- covars[!(covars %in% c(variable,"Elix_score",'Cancer_class',"Abx_last_month","PPI_last_month"))]
-  }else if(variable =="Elix_score"){
-    adj.name <- covars[!(covars %in% c(variable,"Charlson_score",'Cancer_class',"Abx_last_month","PPI_last_month"))]
+  }else if(grepl("Elix_score",variable)){
+    adj.name <- covars[!(covars %in% c(variable,"Charlson_score",'Cancer_class',"Abx_last_month","PPI_last_month","Elix_score"))]
   }else if(variable =="Abx_last_month"){
     adj.name <- covars[!(covars %in% c(variable,'Cancer_class',"Charlson_score","Abx_day_365","Abx_last_month","PPI_last_month"))]
   }else if(variable =="PPI_last_month"){
@@ -78,6 +78,12 @@ if(length(grep('subCancerX\\-Ex',dir))==1){
   }
 }
   
+if(dir=='LungCancer_Smoking'){
+  adj.name <- covars[!(covars %in% c(variable,'GI_nonGI',"Charlson_score","Abx_last_month","PPI_last_month","Cancer_class","Age"))]
+}
+
+if(grepl('_subset',dir)){ adj.name <- c('BMI','Sex','Age')}
+
 cat("[INFO] Adjustment covariates:\n"); print(adj.name)
 
 # ---------------------- Subset Data ----------------------
@@ -181,7 +187,6 @@ for (dist.name in beta.measure) {
                   data = data.obj.rff3$meta.dat)
   obj3 <- dmanova(as.formula(paste0('dist.tmp ~', paste0(adj.name,collapse = '+'),'+',variable)),
                   data = data.obj.rff3$meta.dat)
-
   if(dir %in% c('CancerOnly') & variable %in% covars){ # only covariates we used partial R2
     tss <- obj1$aov.tab[2, 2]
     rss <- obj3$aov.tab[2, 2]
@@ -197,30 +202,29 @@ for (dist.name in beta.measure) {
 save(r2.adj.mat, r2.unadj.mat, pv.adj.mat, pv.unadj.mat, file = 'R2_pvalue.RData')
 
 
-# ---------------------- Differential Abundance Analysis (ZicoSeq) ----------------------
-setwd(paste0(rd, dir))
-
-dir3 <- 'DAA'
-if (!dir.exists(dir3)) {dir.create(dir3)}
-setwd(dir3)
-getwd()
-
-if (!dir.exists(variable)) {dir.create(variable)}
-setwd(variable)
-
-
-set.seed(123)
-# if(class(data.obj3$meta.dat[,variable])!="numeric"){
-  diff.obj <- perform_differential_analysis_zicoseq(data.obj3,
-                                                    taxa.levels = c("Species"),
-                                                    grp.name = variable, adj.name = adj.name,
-                                                    perm.no = 999, cutoff=0.05,
-                                                    is.post.sample = T,
-                                                    prev.filter = 0.2, max.abund.filter = 0.002,
-                                                    ann = '')
-  save(diff.obj, file = paste0(variable, '_ZicoSeq.Rdata'))
-
-# }
-  
-
-
+# # ---------------------- Differential Abundance Analysis (ZicoSeq) ----------------------
+# setwd(paste0(rd, dir))
+# 
+# dir3 <- 'DAA'
+# if (!dir.exists(dir3)) {dir.create(dir3)}
+# setwd(dir3)
+# getwd()
+# 
+# if (!dir.exists(variable)) {dir.create(variable)}
+# setwd(variable)
+# 
+# 
+# set.seed(123)
+# # if(class(data.obj3$meta.dat[,variable])!="numeric"){
+#   diff.obj <- perform_differential_analysis_zicoseq(data.obj3,
+#                                                     taxa.levels = c("Species"),
+#                                                     grp.name = variable, adj.name = adj.name,
+#                                                     perm.no = 999, cutoff=0.05,
+#                                                     is.post.sample = T,
+#                                                     prev.filter = 0.2, max.abund.filter = 0.002,
+#                                                     ann = '')
+#   save(diff.obj, file = paste0(variable, '_ZicoSeq.Rdata'))
+# 
+# # }
+# 
+#   
