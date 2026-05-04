@@ -3,7 +3,7 @@
 This repository contains the analysis and visualization code for the manuscript:
 
 **Microbiome signatures linked to cancer and treatment adverse events in a real-world cohort**  
-Lu Yang, Vaidhvi Singh, Brent J. Gawey, Jason P. Sinnwell, Elle C. Billings, Trena M. Van Gorp, Jonathan J. Harrington, Michael Q. Slama, Lisa M. Till, Stephen Johnson, Thoshik R. Samineni, Mojun Zhu, Krishna R. Kalari, Gianrico Farrugia, Jun Chen*, Ruben A. T. Mars*, and Purna C. Kashyap*
+Lu Yang, Vaidhvi Singh, Brent J. Gawey, Jason P. Sinnwell, Stephen Johnson, Elle C. Billings, Trena M. Van Gorp, Jonathan J. Harrington, Michael Q. Slama, Lisa M. Till, Manavjot Singh, Thoshik R. Samineni, Mojun Zhu, Krishna R. Kalari, Gianrico Farrugia, Jun Chen*, Ruben A. T. Mars*, and Purna C. Kashyap*
 
 The scripts in this repository reproduce the main and supplementary figures and statistical results used in the manuscript.
 
