@@ -28,14 +28,39 @@ This main driver script coordinates all major analyses for the MCCM cohort. It c
 **Stats.R**  
 Utility functions.
 
-**coabundance_networks_fastCCLasso.R**  
-Network inference using fastCCLasso for co-abundance analysis. Also generates co-abundance network figures: Figure S3B, S2A, S2C, 2B
+**coabundance_networks_fastCCLasso_revision.R**  
+Network inference using fastCCLasso for co-abundance analysis. Also generates co-abundance network figures: Figure S3B, S2A, S2B, 2B
 
 **fastCCLasso.R**  
 Source implementation of the fastCCLasso method (see [fastCCLasso](https://github.com/ShenZhang-Statistics/fastCCLasso)).
 
 **Colibactin_analysis.R**  
 Analysis of colibactin gene abundance. Also generates: Figure 2C
+
+**SurvivalAnalysis.R**
+Survival analysis of species abundance data. Also generates: Figure 6
+
+**SurvivalAnalysis_pathway.R**
+Survival analysis of species abundance data. Also generates: Table S8
+
+**coabundance networks fastCCLasso Yachida cohort.R**
+Network inference using fastCCLasso for co-abundance analysis for Yachida cohort. Also generates co-abundance network figures: Figure S2C
+
+**metaphlan/Alpha_Beta_DAA_clean.R**  
+Species-level analysis for different comparisons used in this study for Metaphlan4-derived data, including:
+- Alpha diversity  
+- Beta diversity  
+- Differential abundance analysis  
+
+***metaphlan/Cluster_Mayo_clean.R**  
+This main driver script coordinates all major analyses for the MCCM cohort. It calls the two utility scripts (Alpha_Beta_DAA_clean.R and Alpha_Beta_DAA_func_clean.R) to perform species-level and functional (pathway) analyses across all comparison types, including cancer-only, cancer vs. control, cancer-class vs. other cancers, pan-cancer, and early-onset analyses.
+
+***metaphlan/Toposcore analysis.R**  
+TOPOSCORE-related analysis in the manuscript.
+
+***metaphlan/coabundance networks fastCCLasso_metaphlan_unbiased.R**  
+Network inference using fastCCLasso for co-abundance analysis for Metaphlan4-derived data. Also generates co-abundance network figures: Figure S2B
+
 
 ---
 
@@ -76,5 +101,6 @@ Generates Figure S4B.
 ## Data Availability
 
 The metagenomics data associated with this study is publicly available on NCBI's BioProject database under BioProject ID **PRJNA1235197**.
+Kraken2, MetaPhlAn4, HUMAnN3 derived data were deposited at: https://data.mendeley.com/datasets/b8m9hpwc8p/1
 
 ---
